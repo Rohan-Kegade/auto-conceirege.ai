@@ -1,4 +1,4 @@
-# Broschure — frontend
+# AutoConcierge.ai — frontend
 
 Vite + React + TypeScript + Tailwind CSS v4.
 

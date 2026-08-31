@@ -1,4 +1,5 @@
 import { cn } from "../lib/cn";
+import { BRAND_NAME, BRAND_TAGLINE } from "../lib/brand";
 
 type Props = {
   /** Small mono caption shown beside the wordmark. */
@@ -10,7 +11,7 @@ type Props = {
 };
 
 export function Wordmark({
-  tag = "brochure intelligence",
+  tag = BRAND_TAGLINE,
   tagClassName = "text-muted-2",
   className,
   size = 19,
@@ -21,7 +22,7 @@ export function Wordmark({
         className="font-semibold tracking-[-0.01em]"
         style={{ fontSize: size }}
       >
-        Broschure
+        {BRAND_NAME}
       </span>
       {tag ? (
         <span

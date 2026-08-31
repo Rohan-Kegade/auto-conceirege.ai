@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ *
- * Broschure design tokens — ported from `Brochure Research.dc.html`
+ * AutoConcierge.ai design tokens — ported from `Brochure Research.dc.html`
  * ------------------------------------------------------------------ */
 @theme {
   --font-sans: "Instrument Sans", Helvetica, Arial, sans-serif;
@@ -80,6 +80,12 @@
     margin: 0;
     padding: 0;
     min-height: 100%;
+  }
+
+  html {
+    /* Smooth in-page nav, with room for the sticky landing header. */
+    scroll-behavior: smooth;
+    scroll-padding-top: 88px;
   }
 
   body {
