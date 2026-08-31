@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import type { KeyboardEvent } from "react";
 import { CitationChip } from "../../components/CitationChip";
 import { useApp } from "./AppStore";
+import { ContextPanel } from "./ContextPanel";
 import { FOLLOW_UPS, SUGGESTIONS, type ChatMessage } from "./appData";
 
 const MONO = "font-mono uppercase tracking-[0.1em]";
@@ -198,45 +199,51 @@ export function ChatView() {
   }, [messages, thinking, thinkingLabel]);
 
   return (
-    <div data-view="chat" className="flex min-h-0 flex-1 flex-col">
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto px-7 pb-2.5 pt-[30px]"
-      >
-        <div className="mx-auto flex max-w-[780px] flex-col gap-[26px]">
-          {isEmpty ? (
-            <EmptyState
-              selectedCount={selected.length}
-              onPick={(text) => send(text)}
-            />
-          ) : null}
+    <div data-view="chat" className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto px-7 pb-2.5 pt-[30px]"
+        >
+          <div className="mx-auto flex max-w-[780px] flex-col gap-[26px]">
+            {isEmpty ? (
+              <EmptyState
+                selectedCount={selected.length}
+                onPick={(text) => send(text)}
+              />
+            ) : null}
 
-          {messages.map((message, i) =>
-            message.role === "user" ? (
-              <div key={i} className="flex flex-col gap-3">
-                <div className="max-w-[74%] self-end rounded-[15px_15px_5px_15px] border border-line bg-panel px-[17px] py-[13px] text-[15px] leading-[1.55]">
-                  {message.text}
+            {messages.map((message, i) =>
+              message.role === "user" ? (
+                <div key={i} className="flex flex-col gap-3">
+                  <div className="max-w-[74%] self-end rounded-[15px_15px_5px_15px] border border-line bg-panel px-[17px] py-[13px] text-[15px] leading-[1.55]">
+                    {message.text}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div key={i} className="flex flex-col gap-3">
-                <BotMessage message={message} />
-              </div>
-            ),
-          )}
+              ) : (
+                <div key={i} className="flex flex-col gap-3">
+                  <BotMessage message={message} />
+                </div>
+              ),
+            )}
 
-          {thinking ? (
-            <div className="flex items-center gap-2.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent [animation:pulseDot_1.1s_ease-in-out_infinite]" />
-              <span className="font-mono text-[11.5px] tracking-[0.08em] text-muted-2">
-                {thinkingLabel}
-              </span>
-            </div>
-          ) : null}
+            {thinking ? (
+              <div className="flex items-center gap-2.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent [animation:pulseDot_1.1s_ease-in-out_infinite]" />
+                <span className="font-mono text-[11.5px] tracking-[0.08em] text-muted-2">
+                  {thinkingLabel}
+                </span>
+              </div>
+            ) : null}
+          </div>
         </div>
+
+        <Composer />
       </div>
 
-      <Composer />
+      <aside className="hidden w-[312px] flex-none lg:flex">
+        <ContextPanel />
+      </aside>
     </div>
   );
 }

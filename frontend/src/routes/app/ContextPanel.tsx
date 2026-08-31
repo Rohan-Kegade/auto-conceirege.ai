@@ -14,14 +14,7 @@ export function ContextPanel() {
   const { query, uploads } = state;
 
   return (
-    <aside className="flex h-full min-h-0 flex-col overflow-y-auto border-l border-line bg-panel">
-      <div className="flex h-[53px] flex-none items-center justify-between border-b border-line px-5">
-        <span className={MONO_LABEL}>Context</span>
-        <span className="font-mono text-[10.5px] text-muted-3">
-          {selected.length} in this chat
-        </span>
-      </div>
-
+    <aside className="flex h-full min-h-0 w-full flex-col overflow-hidden border-l border-line bg-panel">
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-4">
         {/* Upload dropzone */}
         <button
