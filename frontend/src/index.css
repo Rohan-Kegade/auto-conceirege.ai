@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Broschure design tokens — ported from `Brochure Research.dc.html`
+ * ------------------------------------------------------------------ */
+@theme {
+  --font-sans: "Instrument Sans", Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Surfaces */
+  --color-canvas: #fbfcfd;
+  --color-panel: #eff3f7;
+  --color-panel-hover: #e6ecf2;
+  --color-panel-tint: #f5f8fb;
+
+  /* Ink */
+  --color-ink: #111820;
+  --color-ink-soft: #1e252c;
+  --color-label: #39434e;
+  --color-slate: #4a5663;
+  --color-muted: #54616e;
+  --color-muted-2: #7c8a99;
+  --color-muted-3: #96a3b2;
+
+  /* Lines */
+  --color-line: #dde4ec;
+  --color-line-soft: #e8eef4;
+  --color-stroke: #c9d3de;
+  --color-stroke-dashed: #b9c5d2;
+  --color-shell: #232b34;
+
+  /* Accent (oklch blues) */
+  --color-accent: oklch(0.52 0.16 250);
+  --color-accent-deep: oklch(0.44 0.16 250);
+  --color-accent-deeper: oklch(0.42 0.16 250);
+  --color-accent-tint: oklch(0.96 0.03 250);
+  --color-accent-tint-2: oklch(0.92 0.06 250);
+  --color-accent-line: oklch(0.89 0.06 250);
+  --color-accent-wash: oklch(0.88 0.07 250);
+
+  /* Status */
+  --color-teal: oklch(0.68 0.13 190);
+  --color-danger: oklch(0.5 0.14 28);
+  --color-danger-ink: oklch(0.48 0.14 28);
+  --color-danger-bg: oklch(0.96 0.02 28);
+  --color-danger-bg-2: oklch(0.97 0.02 28);
+  --color-danger-border: oklch(0.88 0.05 28);
+  --color-danger-stroke: oklch(0.85 0.06 28);
+
+  /* Motion */
+  --animate-pulse-dot: pulseDot 1.1s ease-in-out infinite;
+  --animate-rise-in: riseIn 0.22s ease both;
+}
+
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--color-accent-deeper);
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  ::placeholder {
+    color: var(--color-muted-3);
+  }
+}
