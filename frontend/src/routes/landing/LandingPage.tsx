@@ -107,7 +107,8 @@ export function LandingPage() {
           <h1 className="m-0 mb-[26px] text-[clamp(42px,4.4vw,68px)] font-medium leading-[1.04] tracking-[-0.028em]">
             Every spec, every trim
             <br />— answered from the
-            <br />source document.
+            <br />
+            source document.
           </h1>
           <p className="m-0 mb-[38px] max-w-[30em] text-[18.5px] leading-[1.6] text-slate [text-wrap:pretty]">
             Upload a manufacturer brochure or pull one from the 1,240 already
@@ -184,7 +185,7 @@ export function LandingPage() {
       {/* FAQ */}
       <section id="faq" className={`${SECTION} border-t border-line`}>
         <div className="mx-auto grid max-w-[1040px] gap-x-16 gap-y-8 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <h2 className="m-0 max-w-[9em] text-[38px] font-medium leading-[1.12] tracking-[-0.024em] lg:sticky lg:top-28 lg:self-start">
+          <h2 className="m-0 max-w-[9em] text-[38px] font-medium leading-[1.12] tracking-[-0.024em] lg:sticky lg:top-32 g:self-start">
             Frequently asked questions
           </h2>
           <LandingFaq />
@@ -197,7 +198,8 @@ export function LandingPage() {
           <div>
             <h2 className="m-0 mb-4 text-[46px] font-medium leading-[1.1] tracking-[-0.026em]">
               Stop scrolling brochures.
-              <br />Start asking them.
+              <br />
+              Start asking them.
             </h2>
             <p className="m-0 max-w-[34em] text-[17px] text-[#9BA8B6]">
               Free while you research your next car. No card, no dealer
