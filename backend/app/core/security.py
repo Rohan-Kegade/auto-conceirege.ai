@@ -1,4 +1,4 @@
-"""Password hashing (passlib) and JWT encode/decode helpers.
+"""Password hashing (passlib[bcrypt]) and JWT encode/decode (pyjwt).
 
 TODO: implement.
 """

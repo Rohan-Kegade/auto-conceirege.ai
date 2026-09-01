@@ -1,69 +1,39 @@
-# auto.concierge.ai — backend
+# backend
 
-FastAPI + LangChain RAG service. Users add car brochures (uploaded PDFs or
-picks from an indexed library) to a chat, then ask questions; answers are
-grounded in the selected brochures with page-level citations.
+## Tech stack
 
-> Scaffold only — every `.py` is a stub. No implementation yet.
+- **FastAPI** (async) — HTTP API
+- **PostgreSQL** + **SQLAlchemy** (async) + **Alembic** — app data & migrations
+- **LangChain** — RAG pipeline
+- **Google Gemini** (`langchain-google-genai`) — answers (`gemini-2.0-flash`) and
+  embeddings (`text-embedding-004`); `fastembed`/BGE-small local fallback
+- **Qdrant** — vector store
+- **arq** + **Redis** — background brochure ingestion
 
-## Layout
+## Run locally
 
-```
-backend/
-├── app/
-│   ├── main.py            # FastAPI app factory + lifespan
-│   ├── config.py          # settings (env)
-│   ├── dependencies.py    # shared FastAPI deps (db session, current user, ...)
-│   │
-│   ├── api/
-│   │   ├── router.py      # mounts every route module
-│   │   └── routes/        # health, auth, chats, messages, library, uploads, query
-│   │
-│   ├── core/              # security (JWT/hashing), logging, exception handlers
-│   ├── schemas/           # Pydantic request/response models (the API contract)
-│   ├── models/            # SQLAlchemy tables (user, chat, message, brochure, chunk, upload)
-│   ├── db/                # engine, session, bootstrap
-│   ├── repositories/      # data-access layer (no business rules)
-│   ├── services/          # business logic: chat_service orchestrates a RAG query
-│   │
-│   ├── rag/               # LangChain pipeline
-│   │   ├── loaders.py         # PDF -> Documents (page metadata)
-│   │   ├── splitters.py       # chunking
-│   │   ├── embeddings.py      # embedding model factory
-│   │   ├── vectorstore.py     # pgvector / Chroma client
-│   │   ├── retriever.py       # retriever filtered to a chat's selected brochures
-│   │   ├── prompts.py         # grounded-answer + citation prompts
-│   │   ├── chains.py          # LCEL RAG chain (+ streaming)
-│   │   ├── ingestion.py       # load -> split -> embed -> upsert (+ progress)
-│   │   └── citations.py       # chunks -> page-level citations + source list
-│   │
-│   ├── workers/           # background ingestion jobs
-│   └── utils/             # pdf / text helpers
-│
-├── alembic/              # migrations
-├── scripts/             # ingest_library.py, seed_db.py
-├── data/
-│   ├── uploads/          # raw uploaded PDFs (gitignored)
-│   └── vectorstore/      # local vector db files if not using pgvector (gitignored)
-├── tests/
-├── requirements.txt
-├── pyproject.toml
-├── .env.example
-├── Dockerfile
-└── docker-compose.yml
+Requires Python 3.12 and Docker.
+
+```bash
+cd backend
+
+# 1. infra
+docker compose up -d db qdrant redis
+
+# 2. env
+cp .env.example .env        # set GOOGLE_API_KEY
+
+# 3. deps
+py -3.12 -m venv .venv
+.venv\Scripts\activate      # macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+
+# 4. database
+alembic upgrade head
+
+# 5. run
+uvicorn app.main:app --reload      # http://localhost:8000/api/health
+arq app.workers.arq_worker.WorkerSettings   # ingestion worker (separate shell)
 ```
 
-## Request flow (ask a question)
-
-1. `POST /chats/{id}/query` with the question.
-2. `chat_service` loads the chat's **selected** brochure ids.
-3. `rag.retriever` pulls top-k chunks from the vector store, filtered to those ids.
-4. `rag.chains` formats context + calls the LLM (streaming).
-5. `rag.citations` turns the used chunks into page-level citations + a source list.
-6. The user message and the structured answer are persisted via `repositories.messages`.
-
-## Ingestion flow (add a brochure)
-
-`POST /uploads` stores the PDF and queues a job in `workers/` →
-`rag.ingestion`: load pages → split → embed → upsert to the vector store,
-updating the upload's stage (`uploading → parsing → embedding → ready`).
+`make up | migrate | run | worker | test | lint` wrap these.

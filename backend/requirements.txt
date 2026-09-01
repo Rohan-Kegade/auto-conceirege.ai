@@ -1,28 +1,39 @@
+# --- API ---
 fastapi
 uvicorn[standard]
 pydantic
 pydantic-settings
 python-multipart
 
-# Auth
+# --- Auth ---
 passlib[bcrypt]
-python-jose[cryptography]
+pyjwt
 
-# Database
+# --- Database ---
 sqlalchemy[asyncio]
 asyncpg
 alembic
-pgvector
 
-# RAG / LangChain
+# --- RAG / LangChain ---
 langchain
 langchain-core
 langchain-community
-langchain-openai
 langchain-text-splitters
+langchain-google-genai        # Gemini chat + embeddings
 pypdf
 
-# Tooling
+# --- Vector store ---
+qdrant-client
+langchain-qdrant
+
+# --- Ingestion queue ---
+arq
+redis
+
+# --- Optional: local no-quota embedding fallback for bulk ingest ---
+fastembed
+
+# --- Tooling ---
 pytest
 pytest-asyncio
 httpx

@@ -1,4 +1,8 @@
-"""Aggregates every route module in app/api/routes into a single APIRouter.
+"""Aggregates every route module into a single ``/api`` router."""
 
-TODO: implement.
-"""
+from fastapi import APIRouter
+
+from app.api.routes import health
+
+api_router = APIRouter()
+api_router.include_router(health.router)

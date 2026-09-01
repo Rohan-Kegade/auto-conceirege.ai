@@ -1,1 +1,35 @@
-# TODO: services — api (this app), db (postgres + pgvector), optional worker.
+# Dev infra. `docker compose up -d db qdrant redis`, run the API on the host.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: autoconcierge
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports: ["6333:6333", "6334:6334"]
+    volumes: ["qdrantdata:/qdrant/storage"]
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  # api:      # TODO: build from ./Dockerfile once app.main:app exists
+  #   build: .
+  #   env_file: .env
+  #   ports: ["8000:8000"]
+  #   depends_on: [db, qdrant, redis]
+
+  # worker:   # TODO: arq worker — `arq app.workers.arq_worker.WorkerSettings`
+  #   build: .
+  #   env_file: .env
+  #   command: arq app.workers.arq_worker.WorkerSettings
+  #   depends_on: [db, qdrant, redis]
+
+volumes:
+  pgdata:
+  qdrantdata:

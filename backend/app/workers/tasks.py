@@ -1,4 +1,4 @@
-"""Background task: run ingestion for an upload, update its stage as it goes.
+"""Task entrypoints enqueued onto arq (redis). Thin wrappers around rag.ingestion.
 
 TODO: implement.
 """
