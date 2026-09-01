@@ -10,7 +10,13 @@ const MONO_LABEL =
  * the brochures currently in context; the two entry points (search the indexed
  * library, upload a local file) sit pinned at the bottom.
  */
-export function ContextPanel() {
+export function ContextPanel({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
   const { state, docs, selected, toggleDoc, removeDoc, startUpload } = useApp();
   const { uploads } = state;
 
@@ -31,6 +37,57 @@ export function ContextPanel() {
     if (fileRef.current?.files?.length) startUpload();
     if (fileRef.current) fileRef.current.value = "";
   };
+
+  if (collapsed) {
+    const railBtn =
+      "flex h-9 w-9 items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-panel-hover hover:text-ink";
+    return (
+      <aside className="flex h-full min-h-0 w-full flex-col items-center border-l border-line bg-panel py-4">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Expand context"
+          title="Expand context"
+          className={railBtn}
+        >
+          <ChevronRightIcon className="rotate-180" />
+        </button>
+        <span
+          title={`${selected.length} of ${rows.length} in context`}
+          className="mt-2 rounded-full border border-line px-1.5 py-0.5 font-mono text-[10px] text-muted-2"
+        >
+          {selected.length}/{rows.length}
+        </span>
+        <div className="mt-auto flex flex-col gap-1 border-t border-line pt-3">
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Search brochure library"
+            title="Search brochure library"
+            className={railBtn}
+          >
+            <SearchIcon />
+          </button>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            aria-label="Upload"
+            title="Upload"
+            className={railBtn}
+          >
+            <UploadIcon />
+          </button>
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/pdf"
+          className="hidden"
+          onChange={onFilePicked}
+        />
+      </aside>
+    );
+  }
 
   return (
     <aside className="flex h-full min-h-0 w-full flex-col overflow-hidden border-l border-line bg-panel">
@@ -67,9 +124,20 @@ export function ContextPanel() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
             <span className={MONO_LABEL}>Chat context</span>
-            <span className="flex-none font-mono text-[10.5px] tracking-[0.08em] text-muted-2">
-              {selected.length}/{rows.length}
-            </span>
+            <div className="flex flex-none items-center gap-1.5">
+              <span className="font-mono text-[10.5px] tracking-[0.08em] text-muted-2">
+                {selected.length}/{rows.length}
+              </span>
+              <button
+                type="button"
+                onClick={onToggle}
+                aria-label="Collapse context"
+                title="Collapse context"
+                className="-mr-1 cursor-pointer bg-transparent p-1 text-muted-3 transition-colors hover:text-ink"
+              >
+                <ChevronRightIcon />
+              </button>
+            </div>
           </div>
           {rows.length === 0 ? (
             <div className="text-[12.5px] text-muted-3">
@@ -283,6 +351,25 @@ function LibraryRow({
         </button>
       )}
     </div>
+  );
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
   );
 }
 

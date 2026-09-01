@@ -174,17 +174,19 @@ export function AppLayout() {
     <AppStoreProvider>
       <div
         data-screen="app"
-        className={`grid h-screen grid-cols-1 overflow-hidden bg-canvas ${
-          collapsed ? "md:grid-cols-[56px_1fr]" : "md:grid-cols-[248px_1fr]"
-        }`}
+        className="flex h-screen overflow-hidden bg-canvas"
       >
-        <div className="hidden min-h-0 md:block">
+        <div
+          className={`hidden min-h-0 flex-none overflow-hidden transition-[width] duration-300 ease-in-out motion-reduce:transition-none md:block ${
+            collapsed ? "md:w-14" : "md:w-[248px]"
+          }`}
+        >
           <ChatsSidebar
             collapsed={collapsed}
             onToggle={() => setCollapsed((v) => !v)}
           />
         </div>
-        <main className="flex min-h-0 min-w-0 flex-col">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col">
           <TopBar />
           <Outlet />
         </main>

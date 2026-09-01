@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { CitationChip } from "../../components/CitationChip";
 import { useApp } from "./AppStore";
@@ -197,6 +197,7 @@ export function ChatView() {
   const { state, messages, selected, send } = useApp();
   const { thinking, thinkingLabel, chatSearch } = state;
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [ctxCollapsed, setCtxCollapsed] = useState(false);
   const isEmpty = messages.length === 0 && !thinking;
 
   const search = chatSearch.trim().toLowerCase();
@@ -262,8 +263,15 @@ export function ChatView() {
         <Composer />
       </div>
 
-      <aside className="hidden w-[312px] flex-none lg:flex">
-        <ContextPanel />
+      <aside
+        className={`hidden flex-none overflow-hidden transition-[width] duration-300 ease-in-out motion-reduce:transition-none lg:flex ${
+          ctxCollapsed ? "w-[52px]" : "w-[312px]"
+        }`}
+      >
+        <ContextPanel
+          collapsed={ctxCollapsed}
+          onToggle={() => setCtxCollapsed((v) => !v)}
+        />
       </aside>
     </div>
   );
