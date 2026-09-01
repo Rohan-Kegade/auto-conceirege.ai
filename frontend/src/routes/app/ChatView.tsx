@@ -113,14 +113,14 @@ function BotMessage({
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center gap-2.5">
         <Logo size={20} />
-        <span className={`text-[10.5px] tracking-[0.12em] text-muted-2 ${MONO}`}>
+        <span className={`text-[10.5px] tracking-[0.12em] text-muted ${MONO}`}>
           {message.retrieval}
         </span>
       </div>
 
       <div className="flex flex-col gap-3.5 pl-[30px]">
         {message.paras.map((para, i) => (
-          <div key={i} className="text-[15.5px] leading-[1.68] text-ink-soft">
+          <div key={i} className="text-[15.5px] leading-[1.68] text-ink">
             {para.text}
             {para.cites.map((c, j) => (
               <CitationChip key={j} className="ml-1.5">
@@ -133,7 +133,7 @@ function BotMessage({
         {message.table ? (
           <div className="overflow-x-auto rounded-[13px] border border-line bg-canvas">
             <div className="min-w-[420px]">
-              <div className="grid grid-cols-[1.3fr_1fr_1fr] border-b border-line bg-canvas px-4 py-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-2">
+              <div className="grid grid-cols-[1.3fr_1fr_1fr] border-b border-line bg-canvas px-4 py-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted">
                 {message.table.cols.map((col) => (
                   <span key={col}>{col}</span>
                 ))}
@@ -141,10 +141,10 @@ function BotMessage({
               {message.table.rows.map((row) => (
                 <div
                   key={row[0]}
-                  className="grid grid-cols-[1.3fr_1fr_1fr] border-t border-line-soft px-4 py-[11px] text-[14px] first:border-t-0"
+                  className="grid grid-cols-[1.3fr_1fr_1fr] border-t border-line-soft px-4 py-[11px] text-[14px] text-ink first:border-t-0"
                 >
                   {row.map((cell, k) => (
-                    <span key={k} className={k === 0 ? "text-muted" : undefined}>
+                    <span key={k} className={k === 0 ? "text-label" : undefined}>
                       {cell}
                     </span>
                   ))}
@@ -157,14 +157,14 @@ function BotMessage({
         {message.sources.length > 0 ? (
           <div className="flex flex-wrap items-center gap-2 pt-0.5">
             <span
-              className={`text-[10.5px] tracking-[0.1em] text-muted-3 ${MONO}`}
+              className={`text-[10.5px] tracking-[0.1em] text-muted-2 ${MONO}`}
             >
               sources
             </span>
             {message.sources.map((label, i) => (
               <span
                 key={`${label}-${i}`}
-                className="rounded-full border border-line bg-canvas px-[11px] py-1 text-[12.5px] text-muted"
+                className="rounded-full border border-line bg-canvas px-[11px] py-1 text-[12.5px] text-label"
               >
                 {label}
               </span>
@@ -207,7 +207,7 @@ function Composer() {
                 key={q}
                 type="button"
                 onClick={() => send(q)}
-                className="rounded-full border border-line bg-canvas px-3 py-1.5 text-[12.5px] text-muted transition-colors hover:border-accent hover:text-ink"
+                className="rounded-full border border-line bg-canvas px-3 py-1.5 text-[12.5px] text-label transition-colors hover:border-accent hover:text-ink"
               >
                 {q}
               </button>
@@ -301,7 +301,7 @@ export function ChatView() {
             {thinking ? (
               <div className="flex items-center gap-2.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-accent [animation:pulseDot_1.1s_ease-in-out_infinite]" />
-                <span className="font-mono text-[11.5px] tracking-[0.08em] text-muted-2">
+                <span className="font-mono text-[11.5px] tracking-[0.08em] text-muted">
                   {thinkingLabel}
                 </span>
               </div>

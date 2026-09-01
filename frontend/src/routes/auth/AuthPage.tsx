@@ -99,9 +99,13 @@ export function AuthPage({ mode }: Props) {
           className="flex cursor-pointer items-center gap-2.5 bg-transparent text-left"
         >
           <Logo size={26} />
-          <span className="text-[19px] font-semibold">{BRAND_NAME}</span>
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-2">
-            back to site
+          <span className="flex items-baseline gap-2.5">
+            <span className="text-[19px] font-semibold leading-none">
+              {BRAND_NAME}
+            </span>
+            <span className="font-mono text-[10.5px] uppercase leading-none tracking-[0.14em] text-muted-2">
+              back to site
+            </span>
           </span>
         </button>
 
@@ -130,9 +134,13 @@ export function AuthPage({ mode }: Props) {
             className="mb-8 flex cursor-pointer items-center gap-2.5 bg-transparent md:hidden"
           >
             <Logo size={24} />
-            <span className="text-[17px] font-semibold">{BRAND_NAME}</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-2">
-              back to site
+            <span className="flex items-baseline gap-2.5">
+              <span className="text-[17px] font-semibold leading-none">
+                {BRAND_NAME}
+              </span>
+              <span className="font-mono text-[10px] uppercase leading-none tracking-[0.14em] text-muted-2">
+                back to site
+              </span>
             </span>
           </button>
 

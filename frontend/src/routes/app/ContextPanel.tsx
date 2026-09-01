@@ -228,7 +228,7 @@ export function ContextPanel({
           onChange={onFilePicked}
         />
         <p className="mt-0.5 text-center font-mono text-[10px]  tracking-[0.08em] text-muted-3">
-          Context applies to this chat only
+          above context applies to this chat only
         </p>
       </div>
 
