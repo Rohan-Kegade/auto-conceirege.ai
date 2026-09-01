@@ -134,7 +134,7 @@ function Composer() {
   };
 
   return (
-    <div className="border-t border-line bg-canvas px-7 pb-4 pt-3">
+    <div className="bg-canvas px-7 pb-7 pt-3">
       <div className="mx-auto max-w-[1040px]">
         {showFollowUps ? (
           <div className="mb-2 flex flex-wrap gap-2">

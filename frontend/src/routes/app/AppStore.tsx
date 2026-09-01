@@ -17,10 +17,15 @@ import {
 
 type User = { name: string; email: string; shoppingFor: string; region: string };
 
-/** A conversation owns its own context (the set of brochures in scope). */
+/**
+ * A conversation owns its own context. `docs` is every brochure added to the
+ * chat (what the context panel lists); `selected` is the subset ticked to
+ * actually feed the model. Invariant: `selected` ⊆ `docs`.
+ */
 export type Chat = {
   id: string;
   title: string;
+  docs: string[];
   selected: string[];
   messages: ChatMessage[];
   createdAt: string;
@@ -46,6 +51,7 @@ const SEED_CHATS: Chat[] = [
   {
     id: "c0",
     title: "New research chat",
+    docs: ["d1", "d5", "d3"],
     selected: ["d1", "d5"],
     messages: [],
     createdAt: daysAgoISO(0),
@@ -53,6 +59,7 @@ const SEED_CHATS: Chat[] = [
   {
     id: "c1",
     title: "Terra vs Volt — towing and cargo",
+    docs: ["d3", "d5"],
     selected: ["d3", "d5"],
     messages: [],
     createdAt: daysAgoISO(0),
@@ -60,6 +67,7 @@ const SEED_CHATS: Chat[] = [
   {
     id: "c2",
     title: "Kaelin S60 warranty fine print",
+    docs: ["d4"],
     selected: ["d4"],
     messages: [],
     createdAt: daysAgoISO(1),
@@ -67,6 +75,7 @@ const SEED_CHATS: Chat[] = [
   {
     id: "c3",
     title: "Which EX-7 trim gets the tow pack?",
+    docs: ["d1", "d7"],
     selected: ["d1", "d7"],
     messages: [],
     createdAt: daysAgoISO(3),
@@ -92,6 +101,8 @@ const INITIAL: State = {
 
 type Action =
   | { type: "toggleDoc"; id: string }
+  | { type: "addDoc"; id: string }
+  | { type: "removeDoc"; id: string }
   | { type: "setQuery"; value: string }
   | { type: "setDraft"; value: string }
   | { type: "sendUser"; text: string }
@@ -120,11 +131,29 @@ function patchActive(state: State, fn: (chat: Chat) => Chat): State {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "toggleDoc":
+      // Checkbox in the context panel — flip membership in the model-fed subset.
       return patchActive(state, (c) => ({
         ...c,
+        docs: c.docs.includes(action.id) ? c.docs : [...c.docs, action.id],
         selected: c.selected.includes(action.id)
           ? c.selected.filter((x) => x !== action.id)
           : [...c.selected, action.id],
+      }));
+    case "addDoc":
+      // "Add" from the library search — list it and tick it by default.
+      return patchActive(state, (c) => ({
+        ...c,
+        docs: c.docs.includes(action.id) ? c.docs : [...c.docs, action.id],
+        selected: c.selected.includes(action.id)
+          ? c.selected
+          : [...c.selected, action.id],
+      }));
+    case "removeDoc":
+      // "×" on a panel row — drop it from the chat entirely.
+      return patchActive(state, (c) => ({
+        ...c,
+        docs: c.docs.filter((x) => x !== action.id),
+        selected: c.selected.filter((x) => x !== action.id),
       }));
     case "setQuery":
       return { ...state, query: action.value };
@@ -163,6 +192,7 @@ function reducer(state: State, action: Action): State {
           {
             id,
             title: "New research chat",
+            docs: [],
             selected: [],
             messages: [],
             createdAt: new Date().toISOString(),
@@ -196,11 +226,16 @@ function reducer(state: State, action: Action): State {
       });
       const next = { ...state, uploads };
       return justReady
-        ? patchActive(next, (c) =>
-            c.selected.includes(justReady as string)
-              ? c
-              : { ...c, selected: [...c.selected, justReady as string] },
-          )
+        ? patchActive(next, (c) => {
+            const id = justReady as string;
+            return {
+              ...c,
+              docs: c.docs.includes(id) ? c.docs : [...c.docs, id],
+              selected: c.selected.includes(id)
+                ? c.selected
+                : [...c.selected, id],
+            };
+          })
         : next;
     }
     case "setUser":
@@ -215,8 +250,11 @@ type AppApi = {
   chats: Chat[];
   activeChat: Chat;
   messages: ChatMessage[];
+  docs: string[];
   selected: string[];
   toggleDoc: (id: string) => void;
+  addDoc: (id: string) => void;
+  removeDoc: (id: string) => void;
   setQuery: (value: string) => void;
   setDraft: (value: string) => void;
   send: (text?: string) => void;
@@ -283,8 +321,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       chats: state.chats,
       activeChat: active,
       messages: active.messages,
+      docs: active.docs,
       selected: active.selected,
       toggleDoc: (id) => dispatch({ type: "toggleDoc", id }),
+      addDoc: (id) => dispatch({ type: "addDoc", id }),
+      removeDoc: (id) => dispatch({ type: "removeDoc", id }),
       setQuery: (value) => dispatch({ type: "setQuery", value }),
       setDraft: (value) => dispatch({ type: "setDraft", value }),
       send,
