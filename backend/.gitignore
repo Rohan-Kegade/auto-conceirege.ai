@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local data (raw uploads + local vector store)
+data/uploads/*
+!data/uploads/.gitkeep
+data/vectorstore/*
+!data/vectorstore/.gitkeep
+
+# Misc
+.DS_Store

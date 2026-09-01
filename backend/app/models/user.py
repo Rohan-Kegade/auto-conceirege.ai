@@ -1,0 +1,4 @@
+"""User table.
+
+TODO: implement.
+"""

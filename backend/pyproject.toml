@@ -1,0 +1,14 @@
+# Project metadata + tool config only. Dependencies are pinned in requirements.txt.
+[project]
+name = "autoconcierge-backend"
+version = "0.0.0"
+description = "FastAPI + LangChain RAG backend for auto.concierge.ai"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

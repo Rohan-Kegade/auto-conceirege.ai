@@ -1,0 +1,29 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-multipart
+
+# Auth
+passlib[bcrypt]
+python-jose[cryptography]
+
+# Database
+sqlalchemy[asyncio]
+asyncpg
+alembic
+pgvector
+
+# RAG / LangChain
+langchain
+langchain-core
+langchain-community
+langchain-openai
+langchain-text-splitters
+pypdf
+
+# Tooling
+pytest
+pytest-asyncio
+httpx
+ruff
