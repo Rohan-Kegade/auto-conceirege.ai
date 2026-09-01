@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AppStoreProvider, useApp } from "./AppStore";
 import { ChatsSidebar } from "./ChatsSidebar";
@@ -21,14 +22,21 @@ function TopBar() {
 }
 
 export function AppLayout() {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <AppStoreProvider>
       <div
         data-screen="app"
-        className="grid h-screen grid-cols-1 overflow-hidden bg-canvas md:grid-cols-[248px_1fr]"
+        className={`grid h-screen grid-cols-1 overflow-hidden bg-canvas ${
+          collapsed ? "md:grid-cols-[56px_1fr]" : "md:grid-cols-[248px_1fr]"
+        }`}
       >
         <div className="hidden min-h-0 md:block">
-          <ChatsSidebar />
+          <ChatsSidebar
+            collapsed={collapsed}
+            onToggle={() => setCollapsed((v) => !v)}
+          />
         </div>
         <main className="flex min-h-0 min-w-0 flex-col">
           <TopBar />
@@ -38,4 +46,3 @@ export function AppLayout() {
     </AppStoreProvider>
   );
 }
-

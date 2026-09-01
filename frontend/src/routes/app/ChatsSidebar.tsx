@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BRAND_NAME } from "../../lib/brand";
-import { useApp, type Chat } from "./AppStore";
+import { useApp } from "./AppStore";
 import { SHORT, type Upload } from "./appData";
-
-const MONO_LABEL =
-  "font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-2";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -22,37 +19,13 @@ function contextSummary(ids: string[], uploads: Upload[]): string {
     .join(" · ");
 }
 
-const startOfDay = (d: Date) =>
-  new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-
-/** "Today" / "Yesterday" / a short date, for grouping chats by creation day. */
-function dayBucket(iso: string): string {
-  const then = new Date(iso);
-  const diff = Math.round(
-    (startOfDay(new Date()) - startOfDay(then)) / 86_400_000,
-  );
-  if (diff <= 0) return "Today";
-  if (diff === 1) return "Yesterday";
-  return then.toLocaleDateString(undefined, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-}
-
-/** Chats in list order, split into day groups (order of first appearance). */
-function groupByDay(chats: Chat[]): { label: string; items: Chat[] }[] {
-  const groups: { label: string; items: Chat[] }[] = [];
-  for (const chat of chats) {
-    const label = dayBucket(chat.createdAt);
-    const group = groups.find((g) => g.label === label);
-    if (group) group.items.push(chat);
-    else groups.push({ label, items: [chat] });
-  }
-  return groups;
-}
-
-export function ChatsSidebar() {
+export function ChatsSidebar({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
   const navigate = useNavigate();
   const { state, chats, newChat, selectChat } = useApp();
   const { user, activeChatId, uploads } = state;
@@ -78,83 +51,141 @@ export function ChatsSidebar() {
     navigate(path);
   };
 
+  const startChat = () => {
+    newChat();
+    navigate("/app");
+  };
+
+  if (collapsed) {
+    const railBtn =
+      "flex h-9 w-9 items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-panel-hover hover:text-ink";
+    return (
+      <aside className="flex h-full min-h-0 flex-col items-center border-r border-line bg-panel py-3">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Expand sidebar"
+          title="Expand sidebar"
+          className={railBtn}
+        >
+          <SidebarIcon />
+        </button>
+        <div className="mt-2 flex flex-col gap-1">
+          <button
+            type="button"
+            onClick={startChat}
+            aria-label="New chat"
+            title="New chat"
+            className={railBtn}
+          >
+            <PlusIcon />
+          </button>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Search chats"
+            title="Search chats"
+            className={railBtn}
+          >
+            <SearchIcon />
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate("/app/profile")}
+          title={user.name}
+          className="mt-auto flex h-8 w-8 flex-none items-center justify-center rounded-full bg-ink text-[11px] font-medium text-canvas"
+        >
+          {initials(user.name)}
+        </button>
+      </aside>
+    );
+  }
+
   return (
     <aside className="flex h-full min-h-0 flex-col border-r border-line bg-panel">
-      <div className="flex h-[53px] flex-none items-center px-5">
+      <div className="flex h-[53px] flex-none items-center gap-2 px-5">
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="cursor-pointer bg-transparent text-[20px] font-semibold tracking-[-0.01em]"
+          className="cursor-pointer bg-transparent text-[19px] font-semibold tracking-[-0.01em]"
         >
           {BRAND_NAME}
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Collapse sidebar"
+          title="Collapse sidebar"
+          className="ml-auto flex-none cursor-pointer bg-transparent text-muted-2 transition-colors hover:text-ink"
+        >
+          <SidebarIcon />
         </button>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-3 pt-1">
         <div className="px-2 pb-2">
-          <input
-            value={chatQuery}
-            onChange={(e) => setChatQuery(e.target.value)}
-            placeholder="Search chats"
-            className="w-full rounded-lg border border-stroke bg-canvas px-3 py-1.5 text-[12.5px] outline-none focus:border-accent"
-          />
+          <div className="flex items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 focus-within:border-accent">
+            <SearchIcon className="flex-none text-muted-3" />
+            <input
+              value={chatQuery}
+              onChange={(e) => setChatQuery(e.target.value)}
+              placeholder="Search chats"
+              className="w-full bg-transparent py-1.5 text-[12.5px] outline-none"
+            />
+          </div>
         </div>
-        <div className="flex items-center justify-between gap-2 px-2 pb-1">
-          <span className={MONO_LABEL}>Recent chats</span>
+
+        <div className="flex items-center justify-between gap-2 px-2 pb-1 pt-1">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-3">
+            Chats
+          </span>
           <button
             type="button"
-            onClick={() => {
-              newChat();
-              navigate("/app");
-            }}
+            onClick={startChat}
             aria-label="New chat"
             title="New chat"
-            className="flex h-5 w-5 flex-none cursor-pointer items-center justify-center rounded-md border border-stroke bg-canvas text-[13px] leading-none text-muted transition-colors hover:border-ink hover:text-ink"
+            className="flex h-6 w-6 flex-none items-center justify-center rounded-md text-muted-2 transition-colors hover:bg-panel-hover hover:text-ink"
           >
-            +
+            <PlusIcon />
           </button>
         </div>
+
         {shown.length === 0 ? (
           <div className="px-2 py-2 text-[12.5px] text-muted-3">
             No chats match “{chatQuery}”.
           </div>
-        ) : null}
-        {groupByDay(shown).map((group) => (
-          <div key={group.label} className="flex flex-col">
-            <div className="px-2 pb-1 pt-2 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-3">
-              {group.label}
-            </div>
-            <div className="flex flex-col gap-1 pl-3">
-              {group.items.map((chat) => {
-                const active = chat.id === activeChatId;
-                return (
-                  <button
-                    key={chat.id}
-                    type="button"
-                    onClick={() => {
-                      selectChat(chat.id);
-                      navigate("/app");
-                    }}
-                    className={`flex flex-col gap-0.5 rounded-lg border-l-2 py-2 pl-2.5 pr-2 text-left transition-colors ${
-                      active
-                        ? "border-accent bg-panel-hover font-medium text-ink ring-1 ring-inset ring-line"
-                        : "border-transparent text-label hover:bg-panel-hover"
+        ) : (
+          <div className="flex flex-col gap-1 pl-3">
+            {shown.map((chat) => {
+              const active = chat.id === activeChatId;
+              return (
+                <button
+                  key={chat.id}
+                  type="button"
+                  onClick={() => {
+                    selectChat(chat.id);
+                    navigate("/app");
+                  }}
+                  className={`flex flex-col gap-0.5 rounded-lg border-l-2 py-2 pl-2.5 pr-2 text-left transition-colors ${
+                    active
+                      ? "border-accent bg-panel-hover font-medium text-ink ring-1 ring-inset ring-line"
+                      : "border-transparent text-label hover:bg-panel-hover"
+                  }`}
+                >
+                  <span className="truncate text-[13.5px]">{chat.title}</span>
+                  <span
+                    className={`truncate font-mono text-[10px] uppercase tracking-[0.04em] ${
+                      active ? "text-accent" : "text-muted-3"
                     }`}
                   >
-                    <span className="truncate text-[13.5px]">{chat.title}</span>
-                    <span
-                      className={`truncate font-mono text-[10px] uppercase tracking-[0.04em] ${
-                        active ? "text-accent" : "text-muted-3"
-                      }`}
-                    >
-                      {contextSummary(chat.selected, uploads)}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                    {contextSummary(chat.selected, uploads)}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        ))}
+        )}
       </div>
 
       {/* Account */}
@@ -227,6 +258,66 @@ export function ChatsSidebar() {
         </button>
       </div>
     </aside>
+  );
+}
+
+function SidebarIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="flex-none"
+      aria-hidden="true"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="9" x2="9" y1="3" y2="21" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="flex-none"
+      aria-hidden="true"
+    >
+      <line x1="12" x2="12" y1="5" y2="19" />
+      <line x1="5" x2="19" y1="12" y2="12" />
+    </svg>
+  );
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
   );
 }
 
