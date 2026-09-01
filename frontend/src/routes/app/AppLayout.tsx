@@ -19,6 +19,16 @@ function TopBar() {
 
   const [renaming, setRenaming] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    if (!confirmDelete) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setConfirmDelete(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirmDelete]);
 
   const startRename = () => {
     setNameDraft(activeChat.title);
@@ -27,6 +37,11 @@ function TopBar() {
   const commitRename = () => {
     renameChat(activeChat.id, nameDraft);
     setRenaming(false);
+  };
+  const doDelete = () => {
+    deleteChat(activeChat.id);
+    navigate("/app");
+    setConfirmDelete(false);
   };
 
   return (
@@ -70,10 +85,7 @@ function TopBar() {
       <div className="ml-auto flex flex-none items-center gap-2">
         <button
           type="button"
-          onClick={() => {
-            deleteChat(activeChat.id);
-            navigate("/app");
-          }}
+          onClick={() => setConfirmDelete(true)}
           aria-label="Delete chat"
           title="Delete chat"
           className="flex h-8 w-8 flex-none items-center justify-center rounded-lg border border-stroke text-muted-2 transition-colors hover:border-danger hover:bg-danger-bg hover:text-danger"
@@ -81,6 +93,45 @@ function TopBar() {
           <TrashIcon />
         </button>
       </div>
+
+      {confirmDelete ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-shell/35 p-4 backdrop-blur-[1.5px]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirm delete chat"
+          onClick={() => setConfirmDelete(false)}
+        >
+          <div
+            className="w-full max-w-[380px] rounded-2xl border border-line bg-canvas p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="m-0 text-[16px] font-semibold tracking-[-0.01em]">
+              Delete this chat?
+            </h2>
+            <p className="m-0 mt-2 text-[13.5px] leading-[1.55] text-muted-2">
+              “{activeChat.title}” and all its messages will be removed. This
+              can’t be undone.
+            </p>
+            <div className="mt-5 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="cursor-pointer rounded-[10px] border border-stroke bg-canvas px-4 py-2 text-[13.5px] transition-colors hover:border-ink"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={doDelete}
+                className="cursor-pointer rounded-[10px] bg-danger px-4 py-2 text-[13.5px] font-medium text-canvas transition-colors hover:bg-danger-ink"
+              >
+                Delete chat
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }
