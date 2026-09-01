@@ -61,7 +61,7 @@ export function ContextPanel({
         <div className="mt-auto flex flex-col gap-1 border-t border-line pt-3">
           <button
             type="button"
-            onClick={onToggle}
+            onClick={() => setLibraryOpen(true)}
             aria-label="Search brochure library"
             title="Search brochure library"
             className={railBtn}
@@ -85,6 +85,9 @@ export function ContextPanel({
           className="hidden"
           onChange={onFilePicked}
         />
+        {libraryOpen ? (
+          <LibrarySearchModal onClose={() => setLibraryOpen(false)} />
+        ) : null}
       </aside>
     );
   }
