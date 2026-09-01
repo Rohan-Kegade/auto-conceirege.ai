@@ -14,7 +14,7 @@ import {
 export type SettingsTab = "profile" | "chat" | "notifications" | "account";
 
 function TopBar() {
-  const { state, activeChat, setChatSearch, deleteChat, renameChat } = useApp();
+  const { state, activeChat, deleteChat, renameChat } = useApp();
   const navigate = useNavigate();
 
   const [renaming, setRenaming] = useState(false);
@@ -68,25 +68,6 @@ function TopBar() {
       </div>
 
       <div className="ml-auto flex flex-none items-center gap-2">
-        <div className="flex w-[220px] items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 focus-within:border-accent">
-          <SearchIcon />
-          <input
-            value={state.chatSearch}
-            onChange={(e) => setChatSearch(e.target.value)}
-            placeholder="Search in chat"
-            className="w-full bg-transparent py-1.5 text-[12.5px] outline-none"
-          />
-          {state.chatSearch ? (
-            <button
-              type="button"
-              onClick={() => setChatSearch("")}
-              aria-label="Clear search"
-              className="flex-none cursor-pointer bg-transparent font-mono text-[13px] leading-none text-muted-3 transition-colors hover:text-ink"
-            >
-              ×
-            </button>
-          ) : null}
-        </div>
         <button
           type="button"
           onClick={() => {
@@ -275,26 +256,6 @@ function TrashIcon() {
       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
       <line x1="10" x2="10" y1="11" y2="17" />
       <line x1="14" x2="14" y1="11" y2="17" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="flex-none text-muted-3"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m21 21-4.3-4.3" />
     </svg>
   );
 }

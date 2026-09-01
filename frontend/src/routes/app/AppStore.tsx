@@ -51,7 +51,6 @@ type State = {
   chats: Chat[];
   activeChatId: string;
   query: string;
-  chatSearch: string;
   draft: string;
   thinking: boolean;
   thinkingLabel: string;
@@ -100,7 +99,6 @@ const INITIAL: State = {
   chats: SEED_CHATS,
   activeChatId: "c0",
   query: "",
-  chatSearch: "",
   draft: "",
   thinking: false,
   thinkingLabel: "",
@@ -127,7 +125,6 @@ type Action =
   | { type: "addDoc"; id: string }
   | { type: "removeDoc"; id: string }
   | { type: "setQuery"; value: string }
-  | { type: "setChatSearch"; value: string }
   | { type: "setDraft"; value: string }
   | { type: "sendUser"; text: string }
   | { type: "thinkingLabel"; label: string }
@@ -185,8 +182,6 @@ function reducer(state: State, action: Action): State {
       }));
     case "setQuery":
       return { ...state, query: action.value };
-    case "setChatSearch":
-      return { ...state, chatSearch: action.value };
     case "setDraft":
       return { ...state, draft: action.value };
     case "sendUser":
@@ -218,7 +213,6 @@ function reducer(state: State, action: Action): State {
         seq,
         activeChatId: id,
         draft: "",
-        chatSearch: "",
         chats: [
           {
             id,
@@ -242,7 +236,6 @@ function reducer(state: State, action: Action): State {
           seq,
           activeChatId: id,
           draft: "",
-          chatSearch: "",
           chats: [
             {
               id,
@@ -259,7 +252,7 @@ function reducer(state: State, action: Action): State {
         state.activeChatId === action.id
           ? remaining[0].id
           : state.activeChatId;
-      return { ...state, chats: remaining, activeChatId, chatSearch: "" };
+      return { ...state, chats: remaining, activeChatId };
     }
     case "renameChat": {
       const title = action.title.trim();
@@ -272,7 +265,7 @@ function reducer(state: State, action: Action): State {
       };
     }
     case "selectChat":
-      return { ...state, activeChatId: action.id, draft: "", chatSearch: "" };
+      return { ...state, activeChatId: action.id, draft: "" };
     case "startUpload": {
       const seq = state.seq + 1;
       const name = UPLOAD_NAMES[state.uploads.length % UPLOAD_NAMES.length];
@@ -320,7 +313,6 @@ function reducer(state: State, action: Action): State {
         seq,
         activeChatId: id,
         draft: "",
-        chatSearch: "",
         chats: [
           {
             id,
@@ -349,7 +341,6 @@ type AppApi = {
   addDoc: (id: string) => void;
   removeDoc: (id: string) => void;
   setQuery: (value: string) => void;
-  setChatSearch: (value: string) => void;
   setDraft: (value: string) => void;
   send: (text?: string) => void;
   newChat: () => void;
@@ -427,7 +418,6 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       addDoc: (id) => dispatch({ type: "addDoc", id }),
       removeDoc: (id) => dispatch({ type: "removeDoc", id }),
       setQuery: (value) => dispatch({ type: "setQuery", value }),
-      setChatSearch: (value) => dispatch({ type: "setChatSearch", value }),
       setDraft: (value) => dispatch({ type: "setDraft", value }),
       send,
       newChat: () => {
