@@ -1,5 +1,6 @@
 import { cn } from "../lib/cn";
 import { BRAND_NAME, BRAND_TAGLINE } from "../lib/brand";
+import { Logo } from "./Logo";
 
 type Props = {
   /** Small mono caption shown beside the wordmark. */
@@ -17,7 +18,8 @@ export function Wordmark({
   size = 19,
 }: Props) {
   return (
-    <div className={cn("flex items-baseline gap-2.5", className)}>
+    <div className={cn("flex items-center gap-2.5", className)}>
+      <Logo size={Math.round(size * 1.35)} />
       <span
         className="font-semibold tracking-[-0.01em]"
         style={{ fontSize: size }}

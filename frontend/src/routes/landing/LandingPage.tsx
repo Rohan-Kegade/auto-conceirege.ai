@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
 import { CitationChip } from "../../components/CitationChip";
+import { Logo } from "../../components/Logo";
 import { BRAND_NAME } from "../../lib/brand";
 import { LandingHeader } from "./LandingHeader";
 import { LandingFaq } from "./LandingFaq";
@@ -216,7 +217,10 @@ export function LandingPage() {
         </div>
         <div className="border-t border-shell">
           <div className="mx-auto flex max-w-[1440px] justify-between px-6 py-[22px] font-mono text-[11px] uppercase tracking-[0.1em] text-muted-2 sm:px-12">
-            <span>{BRAND_NAME} © 2026</span>
+            <span className="flex items-center gap-2">
+              <Logo size={16} />
+              {BRAND_NAME} © 2026
+            </span>
             <span>Privacy · Terms · Contact</span>
           </div>
         </div>

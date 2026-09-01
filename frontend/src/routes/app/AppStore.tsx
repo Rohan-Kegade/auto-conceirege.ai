@@ -346,6 +346,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     const send = (text?: string) => {
       const q = (text ?? state.draft).trim();
       if (!q) return;
+      // A chat can't answer until at least one brochure is in its context.
+      if (active.selected.length === 0) return;
       clearTimers();
       dispatch({ type: "sendUser", text: q });
       timers.current.push(

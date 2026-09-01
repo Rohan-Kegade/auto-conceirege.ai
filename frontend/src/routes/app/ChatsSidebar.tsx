@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Logo } from "../../components/Logo";
 import { BRAND_NAME } from "../../lib/brand";
 import { useApp } from "./AppStore";
 import { SHORT, type Upload } from "./appData";
@@ -108,8 +109,9 @@ export function ChatsSidebar({
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="cursor-pointer bg-transparent text-[19px] font-semibold tracking-[-0.01em]"
+          className="flex cursor-pointer items-center gap-2 bg-transparent text-[19px] font-semibold tracking-[-0.01em]"
         >
+          <Logo size={22} />
           {BRAND_NAME}
         </button>
         <button

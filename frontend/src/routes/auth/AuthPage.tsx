@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
+import { Logo } from "../../components/Logo";
 import { BRAND_NAME } from "../../lib/brand";
 
 type Mode = "login" | "register";
@@ -95,8 +96,9 @@ export function AuthPage({ mode }: Props) {
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="flex cursor-pointer items-baseline gap-2.5 bg-transparent text-left"
+          className="flex cursor-pointer items-center gap-2.5 bg-transparent text-left"
         >
+          <Logo size={26} />
           <span className="text-[19px] font-semibold">{BRAND_NAME}</span>
           <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-2">
             back to site
@@ -125,8 +127,9 @@ export function AuthPage({ mode }: Props) {
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="mb-8 flex cursor-pointer items-baseline gap-2.5 bg-transparent md:hidden"
+            className="mb-8 flex cursor-pointer items-center gap-2.5 bg-transparent md:hidden"
           >
+            <Logo size={24} />
             <span className="text-[17px] font-semibold">{BRAND_NAME}</span>
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-2">
               back to site
