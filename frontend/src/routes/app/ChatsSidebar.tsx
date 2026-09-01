@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Logo } from "../../components/Logo";
 import { BRAND_NAME } from "../../lib/brand";
 import type { SettingsTab } from "./AppLayout";
-import { useApp } from "./AppStore";
+import { isStarted, useApp } from "./AppStore";
 import { SHORT, type Upload } from "./appData";
 
 function initials(name: string): string {
@@ -37,9 +37,12 @@ export function ChatsSidebar({
   const [chatQuery, setChatQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const q = chatQuery.trim().toLowerCase();
+  // Only chats the user has actually started (sent a message or added a
+  // brochure) show in the list.
+  const started = chats.filter(isStarted);
   const shown = q
-    ? chats.filter((c) => c.title.toLowerCase().includes(q))
-    : chats;
+    ? started.filter((c) => c.title.toLowerCase().includes(q))
+    : started;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -174,7 +177,9 @@ export function ChatsSidebar({
         <div className="min-h-0 flex-1 overflow-y-auto pb-3">
           {shown.length === 0 ? (
             <div className="px-2 py-2 text-[12.5px] text-muted-3">
-              No chats match “{chatQuery}”.
+              {q
+                ? `No chats match “${chatQuery}”.`
+                : "No chats yet — send a message to start one."}
             </div>
           ) : (
             <div className="flex flex-col gap-1 px-2">

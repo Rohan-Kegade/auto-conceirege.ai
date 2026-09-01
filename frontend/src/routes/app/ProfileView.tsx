@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "../../components/Button";
-import { useApp } from "./AppStore";
+import { isStarted, useApp } from "./AppStore";
 
 const REGIONS = [
   "Australia",
@@ -94,7 +94,7 @@ export function ProfileView() {
   const readyUploads = uploads.filter((u) => u.stage === "ready").length;
 
   const stats: Array<[string, number | string]> = [
-    ["Chats", chats.length],
+    ["Chats", chats.filter(isStarted).length],
     ["Uploads indexed", readyUploads],
     ["Region", form.region || "—"],
   ];

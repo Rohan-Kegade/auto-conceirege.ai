@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
-import { useApp, type AnswerStyle, type Prefs } from "./AppStore";
+import { isStarted, useApp, type AnswerStyle, type Prefs } from "./AppStore";
 
 const ANSWER_STYLES: Array<[AnswerStyle, string]> = [
   ["concise", "Concise — just the answer and its citations"],
@@ -128,6 +128,7 @@ export function ChatSettings() {
   const set = <K extends keyof Prefs>(key: K, value: Prefs[K]) =>
     setPrefs({ [key]: value } as Partial<Prefs>);
 
+  const startedCount = chats.filter(isStarted).length;
   const [confirmClear, setConfirmClear] = useState(false);
 
   return (
@@ -185,7 +186,7 @@ export function ChatSettings() {
       <Section label="History">
         <Row
           title="Clear all chats"
-          desc={`Removes all ${chats.length} conversations and starts a fresh one. Uploaded brochures stay in the library.`}
+          desc={`Removes all ${startedCount} conversations and starts a fresh one. Uploaded brochures stay in the library.`}
         >
           {confirmClear ? (
             <div className="flex items-center gap-2">

@@ -47,6 +47,32 @@ const DAY_MS = 86_400_000;
 const daysAgoISO = (n: number) =>
   new Date(Date.now() - n * DAY_MS).toISOString();
 
+const DEFAULT_TITLE = "New chat";
+
+/**
+ * A chat is "started" — worth keeping and listing — once the user has sent a
+ * message OR added a brochure to its context. Otherwise it's a throwaway draft.
+ */
+export const isStarted = (c: Chat) =>
+  c.messages.length > 0 || c.docs.length > 0;
+
+/** A blank, unstarted chat — the draft the user is composing. */
+function freshChat(seq: number): Chat {
+  return {
+    id: `n${seq}`,
+    title: DEFAULT_TITLE,
+    docs: [],
+    selected: [],
+    messages: [],
+    createdAt: new Date().toISOString(),
+  };
+}
+
+/** One canned Q&A exchange, for seeding history. */
+function seedExchange(question: string, selected: string[]): ChatMessage[] {
+  return [{ role: "user", text: question }, buildAnswer(selected, [])];
+}
+
 type State = {
   chats: Chat[];
   activeChatId: string;
@@ -63,9 +89,9 @@ type State = {
 const SEED_CHATS: Chat[] = [
   {
     id: "c0",
-    title: "New research chat",
-    docs: ["d1", "d5", "d3"],
-    selected: ["d1", "d5"],
+    title: DEFAULT_TITLE,
+    docs: [],
+    selected: [],
     messages: [],
     createdAt: daysAgoISO(0),
   },
@@ -74,7 +100,10 @@ const SEED_CHATS: Chat[] = [
     title: "Terra vs Volt — towing and cargo",
     docs: ["d3", "d5"],
     selected: ["d3", "d5"],
-    messages: [],
+    messages: seedExchange(
+      "How do towing capacity and cargo volume compare?",
+      ["d3", "d5"],
+    ),
     createdAt: daysAgoISO(0),
   },
   {
@@ -82,7 +111,10 @@ const SEED_CHATS: Chat[] = [
     title: "Kaelin S60 warranty fine print",
     docs: ["d4"],
     selected: ["d4"],
-    messages: [],
+    messages: seedExchange(
+      "What does the warranty actually cover, and for how long?",
+      ["d4"],
+    ),
     createdAt: daysAgoISO(1),
   },
   {
@@ -90,7 +122,10 @@ const SEED_CHATS: Chat[] = [
     title: "Which EX-7 trim gets the tow pack?",
     docs: ["d1", "d7"],
     selected: ["d1", "d7"],
-    messages: [],
+    messages: seedExchange(
+      "Which trim includes the tow package as standard?",
+      ["d1", "d7"],
+    ),
     createdAt: daysAgoISO(3),
   },
 ];
@@ -188,6 +223,11 @@ function reducer(state: State, action: Action): State {
       return {
         ...patchActive(state, (c) => ({
           ...c,
+          // First message in an untitled chat becomes its title.
+          title:
+            c.messages.length === 0 && c.title === DEFAULT_TITLE
+              ? action.text.slice(0, 48)
+              : c.title,
           messages: [...c.messages, { role: "user", text: action.text }],
         })),
         draft: "",
@@ -206,51 +246,46 @@ function reducer(state: State, action: Action): State {
         thinkingLabel: "",
       };
     case "newChat": {
+      const active = state.chats.find((c) => c.id === state.activeChatId);
+      // Already on an unstarted chat — reset it in place, don't spawn another.
+      if (active && !isStarted(active)) {
+        return {
+          ...state,
+          draft: "",
+          chats: state.chats.map((c) =>
+            c.id === active.id
+              ? { ...c, docs: [], selected: [], title: DEFAULT_TITLE }
+              : c,
+          ),
+        };
+      }
       const seq = state.seq + 1;
-      const id = `n${seq}`;
+      const fresh = freshChat(seq);
       return {
         ...state,
         seq,
-        activeChatId: id,
+        activeChatId: fresh.id,
         draft: "",
-        chats: [
-          {
-            id,
-            title: "New research chat",
-            docs: [],
-            selected: [],
-            messages: [],
-            createdAt: new Date().toISOString(),
-          },
-          ...state.chats,
-        ],
+        // Drop any stray unstarted drafts as we open a new one.
+        chats: [fresh, ...state.chats.filter(isStarted)],
       };
     }
     case "deleteChat": {
       const remaining = state.chats.filter((c) => c.id !== action.id);
       if (remaining.length === 0) {
         const seq = state.seq + 1;
-        const id = `n${seq}`;
+        const fresh = freshChat(seq);
         return {
           ...state,
           seq,
-          activeChatId: id,
+          activeChatId: fresh.id,
           draft: "",
-          chats: [
-            {
-              id,
-              title: "New research chat",
-              docs: [],
-              selected: [],
-              messages: [],
-              createdAt: new Date().toISOString(),
-            },
-          ],
+          chats: [fresh],
         };
       }
       const activeChatId =
         state.activeChatId === action.id
-          ? remaining[0].id
+          ? (remaining.find(isStarted) ?? remaining[0]).id
           : state.activeChatId;
       return { ...state, chats: remaining, activeChatId };
     }
@@ -265,7 +300,13 @@ function reducer(state: State, action: Action): State {
       };
     }
     case "selectChat":
-      return { ...state, activeChatId: action.id, draft: "" };
+      return {
+        ...state,
+        activeChatId: action.id,
+        draft: "",
+        // Leaving an unstarted draft discards it.
+        chats: state.chats.filter((c) => c.id === action.id || isStarted(c)),
+      };
     case "startUpload": {
       const seq = state.seq + 1;
       const name = UPLOAD_NAMES[state.uploads.length % UPLOAD_NAMES.length];
@@ -307,22 +348,13 @@ function reducer(state: State, action: Action): State {
       return { ...state, prefs: { ...state.prefs, ...action.patch } };
     case "clearChats": {
       const seq = state.seq + 1;
-      const id = `n${seq}`;
+      const fresh = freshChat(seq);
       return {
         ...state,
         seq,
-        activeChatId: id,
+        activeChatId: fresh.id,
         draft: "",
-        chats: [
-          {
-            id,
-            title: "New research chat",
-            docs: [],
-            selected: [],
-            messages: [],
-            createdAt: new Date().toISOString(),
-          },
-        ],
+        chats: [fresh],
       };
     }
     default:
