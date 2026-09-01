@@ -240,8 +240,25 @@ export function ContextPanel({
 }
 
 function LibrarySearchModal({ onClose }: { onClose: () => void }) {
-  const { state, docs, libraryResults, addDoc, setQuery } = useApp();
+  const { state, docs, libraryResults, addDoc, removeDoc, setQuery } = useApp();
   const { query, uploads } = state;
+
+  // Selection is staged locally — nothing touches the chat context until Done.
+  const [pending, setPending] = useState<string[]>(docs);
+  const toggle = (id: string) =>
+    setPending((p) =>
+      p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
+    );
+
+  const applyAndClose = () => {
+    docs.forEach((id) => {
+      if (!pending.includes(id)) removeDoc(id);
+    });
+    pending.forEach((id) => {
+      if (!docs.includes(id)) addDoc(id);
+    });
+    onClose();
+  };
 
   const q = query.trim().toLowerCase();
   const uploadMatches = uploads.filter(
@@ -267,9 +284,22 @@ function LibrarySearchModal({ onClose }: { onClose: () => void }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[68vh] w-full max-w-[540px] flex-col overflow-hidden rounded-2xl border border-line bg-canvas shadow-2xl"
+        className="flex max-h-[68vh] w-full max-w-[540px] flex-col overflow-hidden rounded-2xl border border-line bg-canvas p-5 shadow-2xl"
       >
-        <div className="flex-none border-b border-line p-3">
+        <div className="flex-none border-b border-line pb-4">
+          <div className="flex items-center justify-between gap-2 pb-3">
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-2">
+              Brochure library
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="-my-1 -mr-1 flex h-7 w-7 flex-none items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-panel-hover hover:text-ink"
+            >
+              <CloseIcon />
+            </button>
+          </div>
           <input
             autoFocus
             value={query}
@@ -279,23 +309,25 @@ function LibrarySearchModal({ onClose }: { onClose: () => void }) {
           />
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto p-2">
-          {libraryResults.map((doc) => (
+        <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-1 py-4">
+          {libraryResults.map((doc, i) => (
             <LibraryRow
               key={doc.id}
+              index={i + 1}
               title={doc.title}
               meta={doc.meta}
-              added={docs.includes(doc.id)}
-              onAdd={() => addDoc(doc.id)}
+              selected={pending.includes(doc.id)}
+              onToggle={() => toggle(doc.id)}
             />
           ))}
-          {uploadMatches.map((u) => (
+          {uploadMatches.map((u, j) => (
             <LibraryRow
               key={u.id}
+              index={libraryResults.length + j + 1}
               title={u.name}
               meta="YOUR UPLOAD · INDEXED"
-              added={docs.includes(u.id)}
-              onAdd={() => addDoc(u.id)}
+              selected={pending.includes(u.id)}
+              onToggle={() => toggle(u.id)}
             />
           ))}
           {libraryResults.length === 0 && uploadMatches.length === 0 ? (
@@ -306,14 +338,23 @@ function LibrarySearchModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="flex flex-none items-center justify-between border-t border-line px-3 py-2.5">
-          <span className={MONO_LABEL}>{docs.length} added to chat</span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="cursor-pointer rounded-[9px] border border-stroke bg-canvas px-3.5 py-1.5 text-[13px] font-medium transition-colors hover:border-accent"
-          >
-            Done
-          </button>
+          <span className={MONO_LABEL}>{pending.length} selected</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="cursor-pointer rounded-[9px] px-3 py-1.5 text-[13px] text-muted-2 transition-colors hover:text-ink"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={applyAndClose}
+              className="cursor-pointer rounded-[9px] bg-ink px-3.5 py-1.5 text-[13px] font-medium text-canvas transition-colors hover:bg-accent-deep"
+            >
+              Done
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -321,18 +362,32 @@ function LibrarySearchModal({ onClose }: { onClose: () => void }) {
 }
 
 function LibraryRow({
+  index,
   title,
   meta,
-  added,
-  onAdd,
+  selected,
+  onToggle,
 }: {
+  index: number;
   title: string;
   meta: string;
-  added: boolean;
-  onAdd: () => void;
+  selected: boolean;
+  onToggle: () => void;
 }) {
   return (
-    <div className="flex items-start gap-2.5 rounded-[10px] border border-line bg-canvas px-3 py-2.5">
+    <button
+      type="button"
+      onClick={onToggle}
+      role="checkbox"
+      aria-checked={selected}
+      aria-label={`${selected ? "Deselect" : "Select"} ${title}`}
+      className={`flex items-start gap-2.5 rounded-[10px] border bg-canvas px-3 py-2.5 text-left transition-colors ${
+        selected ? "border-accent" : "border-line hover:border-stroke-dashed"
+      }`}
+    >
+      <span className="mt-0.5 w-4 flex-none text-right font-mono text-[10.5px] text-muted-3">
+        {index}
+      </span>
       <PdfIcon className="mt-0.5 flex-none text-muted-3" />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[13.5px] leading-[1.35]">{title}</span>
@@ -340,20 +395,16 @@ function LibraryRow({
           {meta}
         </span>
       </span>
-      {added ? (
-        <span className="flex-none cursor-default self-center rounded-[8px] border border-line px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-3">
-          Added
-        </span>
-      ) : (
-        <button
-          type="button"
-          onClick={onAdd}
-          className="flex-none cursor-pointer self-center rounded-[8px] border border-stroke bg-canvas px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-accent hover:text-accent"
-        >
-          Add
-        </button>
-      )}
-    </div>
+      <span
+        className={`mt-0.5 flex h-[15px] w-[15px] flex-none items-center justify-center rounded-[4px] ${
+          selected
+            ? "border border-accent bg-accent text-canvas"
+            : "border border-stroke-dashed text-transparent"
+        }`}
+      >
+        <CheckIcon />
+      </span>
+    </button>
   );
 }
 
@@ -433,6 +484,25 @@ function SearchIcon() {
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="flex-none"
+      aria-hidden="true"
+    >
+      <path d="M18 6 6 18M6 6l12 12" />
     </svg>
   );
 }
