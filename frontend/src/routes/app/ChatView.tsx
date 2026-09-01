@@ -1,45 +1,111 @@
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { CitationChip } from "../../components/CitationChip";
+import { BRAND_NAME } from "../../lib/brand";
 import { useApp } from "./AppStore";
 import { ContextPanel } from "./ContextPanel";
 import { FOLLOW_UPS, SUGGESTIONS, type ChatMessage } from "./appData";
 
 const MONO = "font-mono uppercase tracking-[0.1em]";
 
+const SUGGESTION_ICONS = [CompareIcon, GaugeIcon, ShieldIcon, PackageIcon];
+
 function EmptyState({
-  selectedCount,
+  userName,
   onPick,
 }: {
-  selectedCount: number;
+  userName: string;
   onPick: (text: string) => void;
 }) {
+  const firstName = userName.trim().split(/\s+/)[0] || "there";
   return (
-    <div className="pb-2.5 pt-[46px]">
-      <div className={`mb-5 text-[11px] tracking-[0.16em] text-accent ${MONO}`}>
-        {selectedCount ? `${selectedCount} brochures in context` : "no sources yet"}
+    <div className="mx-auto flex min-h-[66vh] max-w-[660px] flex-col items-center justify-center text-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-canvas">
+        <SparkIcon />
+      </span>
+      <div className={`mt-4 text-[10.5px] tracking-[0.18em] text-muted-3 ${MONO}`}>
+        {BRAND_NAME}
       </div>
-      <h2 className="m-0 mb-3.5 text-[34px] font-medium leading-[1.16] tracking-[-0.022em]">
-        What are you weighing up?
+      <h2 className="m-0 mt-3 bg-gradient-to-r from-accent to-accent-deep bg-clip-text text-[40px] font-medium leading-[1.12] tracking-[-0.022em] text-transparent [text-wrap:balance]">
+        Hello, {firstName}
       </h2>
-      <p className="m-0 mb-[30px] max-w-[34em] text-[16.5px] leading-[1.6] text-slate [text-wrap:pretty]">
-        Pick brochures from the library on the left, or upload your own. Then ask
-        anything — specs, trims, running costs, what the footnotes hide.
+      <p className="m-0 mt-3 max-w-[30em] text-[16px] leading-[1.6] text-slate [text-wrap:pretty]">
+        Add car brochures to this chat from the panel on the right, then ask
+        anything — every answer cites the brochure pages it draws from.
       </p>
-      <div className="flex max-w-[560px] flex-col gap-[9px]">
-        {SUGGESTIONS.map((text) => (
-          <button
-            key={text}
-            type="button"
-            onClick={() => onPick(text)}
-            className="flex cursor-pointer justify-between gap-3.5 rounded-[11px] border border-line bg-canvas px-4 py-[13px] text-left text-[14.5px] transition-colors hover:border-accent"
-          >
-            <span>{text}</span>
-            <span className="flex-none font-mono text-[11px] text-muted-3">→</span>
-          </button>
-        ))}
+      <div className="mt-8 grid w-full gap-2.5 sm:grid-cols-2">
+        {SUGGESTIONS.map((text, i) => {
+          const Icon = SUGGESTION_ICONS[i % SUGGESTION_ICONS.length];
+          return (
+            <button
+              key={text}
+              type="button"
+              onClick={() => onPick(text)}
+              className="group flex cursor-pointer items-start gap-3 rounded-2xl border border-line bg-canvas p-3.5 text-left transition-colors hover:border-accent hover:bg-panel-tint"
+            >
+              <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-panel text-muted-2 transition-colors group-hover:text-accent">
+                <Icon />
+              </span>
+              <span className="text-[13.5px] leading-[1.4]">{text}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
+  );
+}
+
+const iconProps = {
+  width: 16,
+  height: 16,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.8,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+  "aria-hidden": true,
+};
+
+function SparkIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg {...iconProps} width={size} height={size} strokeWidth={1.6}>
+      <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8" />
+    </svg>
+  );
+}
+
+function CompareIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 19V5M20 19V5M9 15V9M15 18V6" />
+    </svg>
+  );
+}
+
+function GaugeIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M12 14 8 9" />
+      <path d="M4 18a8 8 0 1 1 16 0" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M12 3 5 6v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z" />
+    </svg>
+  );
+}
+
+function PackageIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M21 8 12 3 3 8v8l9 5 9-5V8Z" />
+      <path d="M3 8l9 5 9-5M12 13v8" />
+    </svg>
   );
 }
 
@@ -51,64 +117,68 @@ function BotMessage({
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center gap-2.5">
-        <span className="h-5 w-5 flex-none rounded-md bg-accent" />
+        <span className="flex h-5 w-5 flex-none items-center justify-center rounded-md bg-accent text-canvas">
+          <SparkIcon size={13} />
+        </span>
         <span className={`text-[10.5px] tracking-[0.12em] text-muted-2 ${MONO}`}>
           {message.retrieval}
         </span>
       </div>
 
-      {message.paras.map((para, i) => (
-        <div key={i} className="text-[15.5px] leading-[1.68] text-ink-soft">
-          {para.text}
-          {para.cites.map((c, j) => (
-            <CitationChip key={j} className="ml-1.5">
-              {c.label}
-            </CitationChip>
-          ))}
-        </div>
-      ))}
-
-      {message.table ? (
-        <div className="overflow-x-auto rounded-[13px] border border-line bg-canvas">
-          <div className="min-w-[420px]">
-            <div className="grid grid-cols-[1.3fr_1fr_1fr] border-b border-line bg-canvas px-4 py-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-2">
-              {message.table.cols.map((col) => (
-                <span key={col}>{col}</span>
-              ))}
-            </div>
-            {message.table.rows.map((row) => (
-              <div
-                key={row[0]}
-                className="grid grid-cols-[1.3fr_1fr_1fr] border-t border-line-soft px-4 py-[11px] text-[14px] first:border-t-0"
-              >
-                {row.map((cell, k) => (
-                  <span key={k} className={k === 0 ? "text-muted" : undefined}>
-                    {cell}
-                  </span>
-                ))}
-              </div>
+      <div className="flex flex-col gap-3.5 pl-[30px]">
+        {message.paras.map((para, i) => (
+          <div key={i} className="text-[15.5px] leading-[1.68] text-ink-soft">
+            {para.text}
+            {para.cites.map((c, j) => (
+              <CitationChip key={j} className="ml-1.5">
+                {c.label}
+              </CitationChip>
             ))}
           </div>
-        </div>
-      ) : null}
+        ))}
 
-      {message.sources.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2 pt-0.5">
-          <span
-            className={`text-[10.5px] tracking-[0.1em] text-muted-3 ${MONO}`}
-          >
-            sources
-          </span>
-          {message.sources.map((label, i) => (
+        {message.table ? (
+          <div className="overflow-x-auto rounded-[13px] border border-line bg-canvas">
+            <div className="min-w-[420px]">
+              <div className="grid grid-cols-[1.3fr_1fr_1fr] border-b border-line bg-canvas px-4 py-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-2">
+                {message.table.cols.map((col) => (
+                  <span key={col}>{col}</span>
+                ))}
+              </div>
+              {message.table.rows.map((row) => (
+                <div
+                  key={row[0]}
+                  className="grid grid-cols-[1.3fr_1fr_1fr] border-t border-line-soft px-4 py-[11px] text-[14px] first:border-t-0"
+                >
+                  {row.map((cell, k) => (
+                    <span key={k} className={k === 0 ? "text-muted" : undefined}>
+                      {cell}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {message.sources.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2 pt-0.5">
             <span
-              key={`${label}-${i}`}
-              className="rounded-full border border-line bg-canvas px-[11px] py-1 text-[12.5px] text-muted"
+              className={`text-[10.5px] tracking-[0.1em] text-muted-3 ${MONO}`}
             >
-              {label}
+              sources
             </span>
-          ))}
-        </div>
-      ) : null}
+            {message.sources.map((label, i) => (
+              <span
+                key={`${label}-${i}`}
+                className="rounded-full border border-line bg-canvas px-[11px] py-1 text-[12.5px] text-muted"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -135,7 +205,7 @@ function Composer() {
 
   return (
     <div className="bg-canvas px-7 pb-7 pt-3">
-      <div className="mx-auto max-w-[1040px]">
+      <div className="mx-auto max-w-[920px]">
         {showFollowUps ? (
           <div className="mb-2 flex flex-wrap gap-2">
             {FOLLOW_UPS.slice(0, 3).map((q) => (
@@ -150,7 +220,7 @@ function Composer() {
             ))}
           </div>
         ) : null}
-        <div className="flex items-end gap-2.5 rounded-xl border border-stroke bg-canvas py-1.5 pl-4 pr-1.5 focus-within:border-accent">
+        <div className="flex items-end gap-2 rounded-xl border border-stroke bg-canvas p-2 pl-4 focus-within:border-accent">
           <textarea
             ref={ref}
             value={draft}
@@ -158,7 +228,7 @@ function Composer() {
             onKeyDown={onKey}
             rows={1}
             placeholder="Ask about trims, features, warranty, running costs…"
-            className="max-h-[120px] flex-1 resize-none bg-transparent py-2 text-[15px] leading-[1.4] outline-none"
+            className="block max-h-[120px] flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-5 outline-none"
           />
           <button
             type="button"
@@ -194,8 +264,8 @@ function messageText(message: ChatMessage): string {
 }
 
 export function ChatView() {
-  const { state, messages, selected, send } = useApp();
-  const { thinking, thinkingLabel, chatSearch } = state;
+  const { state, messages, send } = useApp();
+  const { thinking, thinkingLabel, chatSearch, user } = state;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [ctxCollapsed, setCtxCollapsed] = useState(false);
   const isEmpty = messages.length === 0 && !thinking;
@@ -219,12 +289,12 @@ export function ChatView() {
       <div className="flex min-h-0 flex-1 flex-col">
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto px-7 pb-2.5 pt-[30px]"
+          className="flex-1 overflow-y-auto px-7 pb-12 pt-[30px]"
         >
-          <div className="mx-auto flex max-w-[780px] flex-col gap-[26px]">
+          <div className="mx-auto flex max-w-[920px] flex-col gap-[26px]">
             {isEmpty ? (
               <EmptyState
-                selectedCount={selected.length}
+                userName={user.name}
                 onPick={(text) => send(text)}
               />
             ) : null}
@@ -238,7 +308,7 @@ export function ChatView() {
             {shown.map(({ message, i }) =>
               message.role === "user" ? (
                 <div key={i} className="flex flex-col gap-3">
-                  <div className="max-w-[74%] self-end rounded-[15px_15px_5px_15px] border border-line bg-panel px-[17px] py-[13px] text-[15px] leading-[1.55]">
+                  <div className="max-w-[74%] self-end rounded-[22px] rounded-br-md bg-panel px-[18px] py-3 text-[15px] leading-[1.55] text-ink ring-1 ring-inset ring-line">
                     {message.text}
                   </div>
                 </div>

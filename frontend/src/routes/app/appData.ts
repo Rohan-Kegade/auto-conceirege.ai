@@ -31,10 +31,10 @@ export const UPLOAD_NAMES = [
 ];
 
 export const SUGGESTIONS = [
-  "Compare the feature list across my selected brochures",
+  "Compare the feature lists across the brochures in this chat",
   "Which trim includes adaptive cruise as standard?",
   "Summarise the warranty and service intervals",
-  "What options are bundled in the Premium pack, and what do they cost?",
+  "What's bundled in the Premium pack, and what does it cost?",
 ];
 
 /** Quick follow-ups offered above the composer once a chat is underway. */
