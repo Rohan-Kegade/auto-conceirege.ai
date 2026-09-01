@@ -113,7 +113,7 @@ export function ChatsSidebar({
 
   return (
     <aside className="flex h-full min-h-0 flex-col border-r border-line bg-panel">
-      <div className="flex h-16 flex-none items-center gap-2 px-5">
+      <div className="flex h-14 flex-none items-center gap-2 px-5">
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -133,7 +133,7 @@ export function ChatsSidebar({
         </button>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-3 pt-1">
+      <div className="flex min-h-0 flex-1 flex-col px-3 pt-1">
         <div className="px-2 pb-2">
           <div className="flex items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 focus-within:border-accent">
             <SearchIcon className="flex-none text-muted-3" />
@@ -171,41 +171,43 @@ export function ChatsSidebar({
           </button>
         </div>
 
-        {shown.length === 0 ? (
-          <div className="px-2 py-2 text-[12.5px] text-muted-3">
-            No chats match “{chatQuery}”.
-          </div>
-        ) : (
-          <div className="flex flex-col gap-1 pl-3">
-            {shown.map((chat) => {
-              const active = chat.id === activeChatId;
-              return (
-                <button
-                  key={chat.id}
-                  type="button"
-                  onClick={() => {
-                    selectChat(chat.id);
-                    navigate("/app");
-                  }}
-                  className={`flex flex-col gap-0.5 rounded-lg border-l-2 py-2 pl-2.5 pr-2 text-left transition-colors ${
-                    active
-                      ? "border-accent bg-panel-hover font-medium text-ink ring-1 ring-inset ring-line"
-                      : "border-transparent text-label hover:bg-panel-hover"
-                  }`}
-                >
-                  <span className="truncate text-[13.5px]">{chat.title}</span>
-                  <span
-                    className={`truncate font-mono text-[10px] uppercase tracking-[0.04em] ${
-                      active ? "text-accent" : "text-muted-3"
+        <div className="min-h-0 flex-1 overflow-y-auto pb-3">
+          {shown.length === 0 ? (
+            <div className="px-2 py-2 text-[12.5px] text-muted-3">
+              No chats match “{chatQuery}”.
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1 px-2">
+              {shown.map((chat) => {
+                const active = chat.id === activeChatId;
+                return (
+                  <button
+                    key={chat.id}
+                    type="button"
+                    onClick={() => {
+                      selectChat(chat.id);
+                      navigate("/app");
+                    }}
+                    className={`flex flex-col gap-0.5 rounded-lg border-l-2 py-2 pl-2.5 pr-2 text-left transition-colors ${
+                      active
+                        ? "border-accent bg-panel-hover font-medium text-ink ring-1 ring-inset ring-line"
+                        : "border-transparent text-label hover:bg-panel-hover"
                     }`}
                   >
-                    {contextSummary(chat.selected, uploads)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                    <span className="truncate text-[13.5px]">{chat.title}</span>
+                    <span
+                      className={`truncate font-mono text-[10px] uppercase tracking-[0.04em] ${
+                        active ? "text-accent" : "text-muted-3"
+                      }`}
+                    >
+                      {contextSummary(chat.selected, uploads)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Account */}
@@ -257,7 +259,7 @@ export function ChatsSidebar({
           onClick={() => setMenuOpen((v) => !v)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
-          className="flex w-full items-center gap-2.5 rounded-lg py-1 pl-1 pr-2 text-left transition-colors hover:bg-panel-hover"
+          className="flex w-full items-center gap-2.5 rounded-lg py-1 pl-2 pr-2 text-left transition-colors hover:bg-panel-hover"
         >
           <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-ink text-[11.5px] font-medium text-canvas">
             {initials(user.name)}

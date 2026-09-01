@@ -194,7 +194,7 @@ export function AppLayout() {
       <div data-screen="app" className="flex h-screen overflow-hidden bg-canvas">
         <div
           className={`hidden min-h-0 flex-none overflow-hidden transition-[width] duration-300 ease-in-out motion-reduce:transition-none md:block ${
-            collapsed ? "md:w-14" : "md:w-[248px]"
+            collapsed ? "md:w-14" : "md:w-[268px]"
           }`}
         >
           <ChatsSidebar
