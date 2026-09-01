@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppStoreProvider, useApp } from "./AppStore";
-import { ChatsSidebar } from "./ChatsSidebar";
+import { ChatsSidebar, contextSummary } from "./ChatsSidebar";
 
 function TopBar() {
-  const { activeChat } = useApp();
+  const { state, activeChat, setChatSearch, deleteChat, renameChat } = useApp();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
+  const [renaming, setRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
+
+  const isChat = pathname !== "/app/profile" && pathname !== "/app/settings";
   const title =
     pathname === "/app/profile"
       ? "Profile"
@@ -14,10 +19,151 @@ function TopBar() {
         ? "Settings"
         : activeChat.title;
 
+  const startRename = () => {
+    setNameDraft(activeChat.title);
+    setRenaming(true);
+  };
+  const commitRename = () => {
+    renameChat(activeChat.id, nameDraft);
+    setRenaming(false);
+  };
+
   return (
-    <header className="flex h-[53px] flex-none items-center border-b border-line bg-canvas px-7">
-      <span className="truncate text-[15px] font-medium">{title}</span>
+    <header className="flex h-16 flex-none items-center gap-4 border-b border-line bg-canvas px-7">
+      <div className="flex min-w-0 flex-col justify-center gap-1">
+        <div className="flex min-w-0 items-center gap-1.5">
+          {renaming ? (
+            <input
+              autoFocus
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitRename();
+                if (e.key === "Escape") setRenaming(false);
+              }}
+              className="min-w-0 flex-1 rounded-md border border-stroke bg-canvas px-2 py-0.5 text-[15px] font-medium outline-none focus:border-accent"
+            />
+          ) : (
+            <span className="truncate text-[15px] font-medium leading-tight">
+              {title}
+            </span>
+          )}
+          {isChat && !renaming ? (
+            <button
+              type="button"
+              onClick={startRename}
+              aria-label="Rename chat"
+              title="Rename chat"
+              className="flex-none cursor-pointer bg-transparent p-1 text-muted-3 transition-colors hover:text-ink"
+            >
+              <PencilIcon />
+            </button>
+          ) : null}
+        </div>
+        {isChat ? (
+          <span className="truncate pl-2 font-mono text-[10px] uppercase tracking-[0.04em] text-muted-3">
+            {contextSummary(activeChat.selected, state.uploads)}
+          </span>
+        ) : null}
+      </div>
+
+      {isChat ? (
+        <div className="ml-auto flex flex-none items-center gap-2">
+          <div className="flex w-[220px] items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 focus-within:border-accent">
+            <SearchIcon />
+            <input
+              value={state.chatSearch}
+              onChange={(e) => setChatSearch(e.target.value)}
+              placeholder="Search in chat"
+              className="w-full bg-transparent py-1.5 text-[12.5px] outline-none"
+            />
+            {state.chatSearch ? (
+              <button
+                type="button"
+                onClick={() => setChatSearch("")}
+                aria-label="Clear search"
+                className="flex-none cursor-pointer bg-transparent font-mono text-[13px] leading-none text-muted-3 transition-colors hover:text-ink"
+              >
+                ×
+              </button>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              deleteChat(activeChat.id);
+              navigate("/app");
+            }}
+            aria-label="Delete chat"
+            title="Delete chat"
+            className="flex h-8 w-8 flex-none items-center justify-center rounded-lg border border-stroke text-muted-2 transition-colors hover:border-danger hover:bg-danger-bg hover:text-danger"
+          >
+            <TrashIcon />
+          </button>
+        </div>
+      ) : null}
     </header>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 6h18" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <line x1="10" x2="10" y1="11" y2="17" />
+      <line x1="14" x2="14" y1="11" y2="17" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="flex-none text-muted-3"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
   );
 }
 

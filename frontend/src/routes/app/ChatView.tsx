@@ -187,11 +187,26 @@ function Composer() {
   );
 }
 
+function messageText(message: ChatMessage): string {
+  return message.role === "user"
+    ? message.text
+    : message.paras.map((p) => p.text).join(" ");
+}
+
 export function ChatView() {
   const { state, messages, selected, send } = useApp();
-  const { thinking, thinkingLabel } = state;
+  const { thinking, thinkingLabel, chatSearch } = state;
   const scrollRef = useRef<HTMLDivElement>(null);
   const isEmpty = messages.length === 0 && !thinking;
+
+  const search = chatSearch.trim().toLowerCase();
+  const shown = messages
+    .map((message, i) => ({ message, i }))
+    .filter(
+      ({ message }) =>
+        !search || messageText(message).toLowerCase().includes(search),
+    );
+  const noMatches = search.length > 0 && shown.length === 0;
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -213,7 +228,13 @@ export function ChatView() {
               />
             ) : null}
 
-            {messages.map((message, i) =>
+            {noMatches ? (
+              <div className="py-2 text-[13px] text-muted-3">
+                No messages in this chat match “{chatSearch.trim()}”.
+              </div>
+            ) : null}
+
+            {shown.map(({ message, i }) =>
               message.role === "user" ? (
                 <div key={i} className="flex flex-col gap-3">
                   <div className="max-w-[74%] self-end rounded-[15px_15px_5px_15px] border border-line bg-panel px-[17px] py-[13px] text-[15px] leading-[1.55]">

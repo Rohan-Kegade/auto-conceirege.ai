@@ -11,7 +11,7 @@ function initials(name: string): string {
 }
 
 /** Names the brochures in a chat's context, collapsing to a count past two. */
-function contextSummary(ids: string[], uploads: Upload[]): string {
+export function contextSummary(ids: string[], uploads: Upload[]): string {
   if (ids.length === 0) return "no context";
   if (ids.length > 2) return `${ids.length} brochures`;
   return ids
@@ -104,7 +104,7 @@ export function ChatsSidebar({
 
   return (
     <aside className="flex h-full min-h-0 flex-col border-r border-line bg-panel">
-      <div className="flex h-[53px] flex-none items-center gap-2 px-5">
+      <div className="flex h-16 flex-none items-center gap-2 px-5">
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -133,6 +133,16 @@ export function ChatsSidebar({
               placeholder="Search chats"
               className="w-full bg-transparent py-1.5 text-[12.5px] outline-none"
             />
+            {chatQuery ? (
+              <button
+                type="button"
+                onClick={() => setChatQuery("")}
+                aria-label="Clear search"
+                className="flex-none cursor-pointer bg-transparent font-mono text-[13px] leading-none text-muted-3 transition-colors hover:text-ink"
+              >
+                ×
+              </button>
+            ) : null}
           </div>
         </div>
 

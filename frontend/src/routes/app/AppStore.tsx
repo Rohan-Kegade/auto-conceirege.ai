@@ -39,6 +39,7 @@ type State = {
   chats: Chat[];
   activeChatId: string;
   query: string;
+  chatSearch: string;
   draft: string;
   thinking: boolean;
   thinkingLabel: string;
@@ -86,6 +87,7 @@ const INITIAL: State = {
   chats: SEED_CHATS,
   activeChatId: "c0",
   query: "",
+  chatSearch: "",
   draft: "",
   thinking: false,
   thinkingLabel: "",
@@ -104,11 +106,14 @@ type Action =
   | { type: "addDoc"; id: string }
   | { type: "removeDoc"; id: string }
   | { type: "setQuery"; value: string }
+  | { type: "setChatSearch"; value: string }
   | { type: "setDraft"; value: string }
   | { type: "sendUser"; text: string }
   | { type: "thinkingLabel"; label: string }
   | { type: "answer" }
   | { type: "newChat" }
+  | { type: "deleteChat"; id: string }
+  | { type: "renameChat"; id: string; title: string }
   | { type: "selectChat"; id: string }
   | { type: "startUpload" }
   | { type: "uploadTick" }
@@ -157,6 +162,8 @@ function reducer(state: State, action: Action): State {
       }));
     case "setQuery":
       return { ...state, query: action.value };
+    case "setChatSearch":
+      return { ...state, chatSearch: action.value };
     case "setDraft":
       return { ...state, draft: action.value };
     case "sendUser":
@@ -188,6 +195,7 @@ function reducer(state: State, action: Action): State {
         seq,
         activeChatId: id,
         draft: "",
+        chatSearch: "",
         chats: [
           {
             id,
@@ -201,8 +209,47 @@ function reducer(state: State, action: Action): State {
         ],
       };
     }
+    case "deleteChat": {
+      const remaining = state.chats.filter((c) => c.id !== action.id);
+      if (remaining.length === 0) {
+        const seq = state.seq + 1;
+        const id = `n${seq}`;
+        return {
+          ...state,
+          seq,
+          activeChatId: id,
+          draft: "",
+          chatSearch: "",
+          chats: [
+            {
+              id,
+              title: "New research chat",
+              docs: [],
+              selected: [],
+              messages: [],
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        };
+      }
+      const activeChatId =
+        state.activeChatId === action.id
+          ? remaining[0].id
+          : state.activeChatId;
+      return { ...state, chats: remaining, activeChatId, chatSearch: "" };
+    }
+    case "renameChat": {
+      const title = action.title.trim();
+      if (!title) return state;
+      return {
+        ...state,
+        chats: state.chats.map((c) =>
+          c.id === action.id ? { ...c, title } : c,
+        ),
+      };
+    }
     case "selectChat":
-      return { ...state, activeChatId: action.id, draft: "" };
+      return { ...state, activeChatId: action.id, draft: "", chatSearch: "" };
     case "startUpload": {
       const seq = state.seq + 1;
       const name = UPLOAD_NAMES[state.uploads.length % UPLOAD_NAMES.length];
@@ -256,9 +303,12 @@ type AppApi = {
   addDoc: (id: string) => void;
   removeDoc: (id: string) => void;
   setQuery: (value: string) => void;
+  setChatSearch: (value: string) => void;
   setDraft: (value: string) => void;
   send: (text?: string) => void;
   newChat: () => void;
+  deleteChat: (id: string) => void;
+  renameChat: (id: string, title: string) => void;
   selectChat: (id: string) => void;
   startUpload: () => void;
   setUser: (patch: Partial<User>) => void;
@@ -327,12 +377,18 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       addDoc: (id) => dispatch({ type: "addDoc", id }),
       removeDoc: (id) => dispatch({ type: "removeDoc", id }),
       setQuery: (value) => dispatch({ type: "setQuery", value }),
+      setChatSearch: (value) => dispatch({ type: "setChatSearch", value }),
       setDraft: (value) => dispatch({ type: "setDraft", value }),
       send,
       newChat: () => {
         clearTimers();
         dispatch({ type: "newChat" });
       },
+      deleteChat: (id) => {
+        clearTimers();
+        dispatch({ type: "deleteChat", id });
+      },
+      renameChat: (id, title) => dispatch({ type: "renameChat", id, title }),
       selectChat: (id) => {
         clearTimers();
         dispatch({ type: "selectChat", id });
