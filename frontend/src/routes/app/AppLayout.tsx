@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppStoreProvider, useApp } from "./AppStore";
 import { ChatsSidebar, contextSummary } from "./ChatsSidebar";
@@ -167,6 +168,44 @@ function SearchIcon() {
   );
 }
 
+const NAV = [
+  { to: "/app", label: "Chats", icon: <ChatIcon /> },
+  { to: "/app/profile", label: "Profile", icon: <UserIcon /> },
+];
+
+function ActivityRail() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const item = (to: string, label: string, icon: ReactNode) => {
+    const active = pathname === to;
+    return (
+      <button
+        key={to}
+        type="button"
+        onClick={() => navigate(to)}
+        aria-label={label}
+        aria-current={active ? "page" : undefined}
+        title={label}
+        className={`flex h-10 w-10 flex-none items-center justify-center rounded-xl transition-colors ${
+          active
+            ? "bg-accent-tint text-accent-deep"
+            : "text-muted-2 hover:bg-panel-hover hover:text-ink"
+        }`}
+      >
+        {icon}
+      </button>
+    );
+  };
+
+  return (
+    <nav className="hidden w-14 flex-none flex-col items-center gap-1 border-r border-line bg-panel py-3 md:flex">
+      {NAV.map((n) => item(n.to, n.label, n.icon))}
+      <div className="mt-auto">{item("/app/settings", "Settings", <GearIcon />)}</div>
+    </nav>
+  );
+}
+
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -176,6 +215,7 @@ export function AppLayout() {
         data-screen="app"
         className="flex h-screen overflow-hidden bg-canvas"
       >
+        <ActivityRail />
         <div
           className={`hidden min-h-0 flex-none overflow-hidden transition-[width] duration-300 ease-in-out motion-reduce:transition-none md:block ${
             collapsed ? "md:w-14" : "md:w-[248px]"
@@ -192,5 +232,61 @@ export function AppLayout() {
         </main>
       </div>
     </AppStoreProvider>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function GearIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
   );
 }

@@ -17,6 +17,18 @@ import {
 
 type User = { name: string; email: string; shoppingFor: string; region: string };
 
+export type AnswerStyle = "concise" | "balanced" | "detailed";
+
+/** App-wide preferences, edited on the Settings screen. */
+export type Prefs = {
+  answerStyle: AnswerStyle;
+  citationsAlways: boolean;
+  regionAware: boolean;
+  compactMessages: boolean;
+  productUpdates: boolean;
+  weeklyDigest: boolean;
+};
+
 /**
  * A conversation owns its own context. `docs` is every brochure added to the
  * chat (what the context panel lists); `selected` is the subset ticked to
@@ -45,6 +57,7 @@ type State = {
   thinkingLabel: string;
   uploads: Upload[];
   user: User;
+  prefs: Prefs;
   seq: number;
 };
 
@@ -98,6 +111,14 @@ const INITIAL: State = {
     shoppingFor: "7-seat family SUV",
     region: "Australia",
   },
+  prefs: {
+    answerStyle: "balanced",
+    citationsAlways: true,
+    regionAware: true,
+    compactMessages: false,
+    productUpdates: true,
+    weeklyDigest: false,
+  },
   seq: 0,
 };
 
@@ -117,7 +138,9 @@ type Action =
   | { type: "selectChat"; id: string }
   | { type: "startUpload" }
   | { type: "uploadTick" }
-  | { type: "setUser"; patch: Partial<User> };
+  | { type: "setUser"; patch: Partial<User> }
+  | { type: "setPrefs"; patch: Partial<Prefs> }
+  | { type: "clearChats" };
 
 function stageFor(pct: number): Upload["stage"] {
   if (pct >= 100) return "ready";
@@ -287,6 +310,29 @@ function reducer(state: State, action: Action): State {
     }
     case "setUser":
       return { ...state, user: { ...state.user, ...action.patch } };
+    case "setPrefs":
+      return { ...state, prefs: { ...state.prefs, ...action.patch } };
+    case "clearChats": {
+      const seq = state.seq + 1;
+      const id = `n${seq}`;
+      return {
+        ...state,
+        seq,
+        activeChatId: id,
+        draft: "",
+        chatSearch: "",
+        chats: [
+          {
+            id,
+            title: "New research chat",
+            docs: [],
+            selected: [],
+            messages: [],
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      };
+    }
     default:
       return state;
   }
@@ -312,6 +358,8 @@ type AppApi = {
   selectChat: (id: string) => void;
   startUpload: () => void;
   setUser: (patch: Partial<User>) => void;
+  setPrefs: (patch: Partial<Prefs>) => void;
+  clearChats: () => void;
   libraryResults: typeof LIBRARY;
 };
 
@@ -397,6 +445,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       },
       startUpload: () => dispatch({ type: "startUpload" }),
       setUser: (patch) => dispatch({ type: "setUser", patch }),
+      setPrefs: (patch) => dispatch({ type: "setPrefs", patch }),
+      clearChats: () => {
+        clearTimers();
+        dispatch({ type: "clearChats" });
+      },
       libraryResults,
     };
   }, [state]);
