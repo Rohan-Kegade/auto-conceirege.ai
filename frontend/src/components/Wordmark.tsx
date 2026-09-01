@@ -20,22 +20,24 @@ export function Wordmark({
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       <Logo size={Math.round(size * 1.35)} />
-      <span
-        className="font-semibold tracking-[-0.01em]"
-        style={{ fontSize: size }}
-      >
-        {BRAND_NAME}
-      </span>
-      {tag ? (
+      <div className="flex items-baseline gap-2.5">
         <span
-          className={cn(
-            "font-mono text-[10.5px] uppercase tracking-[0.14em]",
-            tagClassName,
-          )}
+          className="font-semibold leading-none tracking-[-0.01em]"
+          style={{ fontSize: size }}
         >
-          {tag}
+          {BRAND_NAME}
         </span>
-      ) : null}
+        {tag ? (
+          <span
+            className={cn(
+              "font-mono text-[10.5px] uppercase leading-none tracking-[0.14em]",
+              tagClassName,
+            )}
+          >
+            {tag}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -69,7 +69,7 @@ export function ChatsSidebar({
           title="Expand sidebar"
           className={railBtn}
         >
-          <SidebarIcon />
+          <ChevronLeftIcon className="rotate-180" />
         </button>
         <div className="mt-2 flex flex-col gap-1">
           <button
@@ -119,9 +119,9 @@ export function ChatsSidebar({
           onClick={onToggle}
           aria-label="Collapse sidebar"
           title="Collapse sidebar"
-          className="ml-auto flex-none cursor-pointer bg-transparent text-muted-2 transition-colors hover:text-ink"
+          className="ml-auto flex-none cursor-pointer bg-transparent p-1 text-muted-2 transition-colors hover:text-ink"
         >
-          <SidebarIcon />
+          <ChevronLeftIcon />
         </button>
       </div>
 
@@ -255,7 +255,7 @@ export function ChatsSidebar({
             {initials(user.name)}
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13.5px] font-medium text-ink">
+            <span className="truncate text-[13.5px] font-semibold text-ink">
               {user.name}
             </span>
             <span className="truncate text-[11.5px] text-muted-2">
@@ -273,7 +273,7 @@ export function ChatsSidebar({
   );
 }
 
-function SidebarIcon() {
+function ChevronLeftIcon({ className }: { className?: string }) {
   return (
     <svg
       width="17"
@@ -281,14 +281,13 @@ function SidebarIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="flex-none"
+      className={`flex-none ${className ?? ""}`}
       aria-hidden="true"
     >
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <line x1="9" x2="9" y1="3" y2="21" />
+      <polyline points="15 18 9 12 15 6" />
     </svg>
   );
 }
