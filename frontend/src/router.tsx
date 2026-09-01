@@ -3,8 +3,6 @@ import { LandingPage } from "./routes/landing/LandingPage";
 import { AuthPage } from "./routes/auth/AuthPage";
 import { AppLayout } from "./routes/app/AppLayout";
 import { ChatView } from "./routes/app/ChatView";
-import { ProfileView } from "./routes/app/ProfileView";
-import { SettingsView } from "./routes/app/SettingsView";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -13,11 +11,7 @@ export const router = createBrowserRouter([
   {
     path: "/app",
     element: <AppLayout />,
-    children: [
-      { index: true, element: <ChatView /> },
-      { path: "profile", element: <ProfileView /> },
-      { path: "settings", element: <SettingsView /> },
-    ],
+    children: [{ index: true, element: <ChatView /> }],
   },
   { path: "*", element: <Navigate to="/" replace /> },
 ]);

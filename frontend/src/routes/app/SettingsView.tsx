@@ -20,10 +20,10 @@ function Row({
   children: ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-3.5">
+    <div className="flex items-start justify-between gap-4 py-3">
       <div className="flex min-w-0 flex-col">
-        <span className="text-[14px] font-medium">{title}</span>
-        <span className="mt-0.5 text-[12.5px] leading-[1.5] text-muted-2">
+        <span className="text-[13px] font-medium">{title}</span>
+        <span className="mt-0.5 text-[11.5px] leading-[1.5] text-muted-2">
           {desc}
         </span>
       </div>
@@ -75,14 +75,14 @@ function Field({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex flex-col gap-2">
-      <span className="text-[13px] font-medium text-label">{label}</span>
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[12.5px] font-medium text-label">{label}</span>
       <input
         type={type}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-[10px] border border-stroke bg-canvas px-[15px] py-3 text-[15px] outline-none focus:border-accent"
+        className="rounded-[9px] border border-stroke bg-canvas px-3 py-2 text-[13px] outline-none focus:border-accent"
       />
     </label>
   );
@@ -98,9 +98,9 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 border-t border-line pt-6">
+    <div className="flex flex-col gap-2.5 border-t border-line pt-5">
       <div
-        className={`font-mono text-[11px] uppercase tracking-[0.16em] ${
+        className={`font-mono text-[10.5px] uppercase tracking-[0.16em] ${
           accent ? "text-accent" : "text-muted-3"
         }`}
       >
@@ -111,13 +111,158 @@ function Section({
   );
 }
 
-export function SettingsView() {
-  const navigate = useNavigate();
+/** Wrapper for a settings tab — drops the leading section's top rule. */
+function TabBody({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2 [&>*:first-child]:border-t-0 [&>*:first-child]:pt-0">
+      {children}
+    </div>
+  );
+}
+
+/** Chat & answer behaviour, plus clearing conversation history. */
+export function ChatSettings() {
   const { state, chats, setPrefs, clearChats } = useApp();
   const { prefs } = state;
 
   const set = <K extends keyof Prefs>(key: K, value: Prefs[K]) =>
     setPrefs({ [key]: value } as Partial<Prefs>);
+
+  const [confirmClear, setConfirmClear] = useState(false);
+
+  return (
+    <TabBody>
+      <Section label="Answers" accent>
+        <label className="flex flex-col gap-1.5 py-1">
+          <span className="text-[13px] font-medium">Answer style</span>
+          <select
+            value={prefs.answerStyle}
+            onChange={(e) => set("answerStyle", e.target.value as AnswerStyle)}
+            className="rounded-[9px] border border-stroke bg-canvas px-3 py-2 text-[13px] outline-none focus:border-accent"
+          >
+            {ANSWER_STYLES.map(([value, text]) => (
+              <option key={value} value={value}>
+                {text}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="divide-y divide-line-soft">
+          <Row
+            title="Always show citations"
+            desc="Attach the source brochure and page to every figure in an answer."
+          >
+            <Toggle
+              label="Always show citations"
+              on={prefs.citationsAlways}
+              onChange={(v) => set("citationsAlways", v)}
+            />
+          </Row>
+          <Row
+            title="Region-aware pricing"
+            desc="Bias pricing, tax and availability answers to your profile region."
+          >
+            <Toggle
+              label="Region-aware pricing"
+              on={prefs.regionAware}
+              onChange={(v) => set("regionAware", v)}
+            />
+          </Row>
+          <Row
+            title="Compact message density"
+            desc="Tighter spacing between messages in the chat window."
+          >
+            <Toggle
+              label="Compact message density"
+              on={prefs.compactMessages}
+              onChange={(v) => set("compactMessages", v)}
+            />
+          </Row>
+        </div>
+      </Section>
+
+      <Section label="History">
+        <Row
+          title="Clear all chats"
+          desc={`Removes all ${chats.length} conversations and starts a fresh one. Uploaded brochures stay in the library.`}
+        >
+          {confirmClear ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  clearChats();
+                  setConfirmClear(false);
+                }}
+                className="cursor-pointer rounded-[9px] bg-danger px-3 py-1.5 text-[12.5px] font-medium text-canvas transition-colors hover:bg-danger-ink"
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmClear(false)}
+                className="cursor-pointer bg-transparent text-[12.5px] text-muted-2 hover:text-ink"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmClear(true)}
+              className="cursor-pointer rounded-[9px] border border-stroke bg-canvas px-3 py-1.5 text-[12.5px] transition-colors hover:border-ink"
+            >
+              Clear
+            </button>
+          )}
+        </Row>
+      </Section>
+    </TabBody>
+  );
+}
+
+/** Email notification preferences. */
+export function NotificationSettings() {
+  const { state, setPrefs } = useApp();
+  const { prefs } = state;
+
+  const set = <K extends keyof Prefs>(key: K, value: Prefs[K]) =>
+    setPrefs({ [key]: value } as Partial<Prefs>);
+
+  return (
+    <TabBody>
+      <Section label="Notifications" accent>
+        <div className="divide-y divide-line-soft">
+          <Row
+            title="Product updates"
+            desc="Occasional email when new marques or features land."
+          >
+            <Toggle
+              label="Product updates"
+              on={prefs.productUpdates}
+              onChange={(v) => set("productUpdates", v)}
+            />
+          </Row>
+          <Row
+            title="Weekly digest"
+            desc="A summary of the brochures added to the library each week."
+          >
+            <Toggle
+              label="Weekly digest"
+              on={prefs.weeklyDigest}
+              onChange={(v) => set("weeklyDigest", v)}
+            />
+          </Row>
+        </div>
+      </Section>
+    </TabBody>
+  );
+}
+
+/** Password, sign out and account deletion. */
+export function AccountSettings() {
+  const navigate = useNavigate();
 
   // --- Change password (UI-only in this build) ---
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
@@ -145,240 +290,128 @@ export function SettingsView() {
     setPwMsg({ kind: "ok", text: "Password updated." });
   };
 
-  const [confirmClear, setConfirmClear] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteText, setDeleteText] = useState("");
 
   return (
-    <div data-view="settings" className="flex-1 overflow-y-auto px-7 py-8">
-      <div className="mx-auto flex max-w-[640px] flex-col gap-2">
-        <button
-          type="button"
-          onClick={() => navigate("/app")}
-          className="mb-6 flex w-fit cursor-pointer items-center gap-1.5 bg-transparent font-mono text-[11px] uppercase tracking-[0.12em] text-muted-3 transition-colors hover:text-ink"
-        >
-          <span aria-hidden="true">←</span> Back to chats
-        </button>
+    <TabBody>
+      <Section label="Security" accent>
+        <div className="flex flex-col gap-4 pt-1">
+          <Field
+            label="Current password"
+            type="password"
+            value={pw.current}
+            placeholder="••••••••"
+            onChange={(v) => setPw((p) => ({ ...p, current: v }))}
+          />
+          <Field
+            label="New password"
+            type="password"
+            value={pw.next}
+            placeholder="At least 8 characters"
+            onChange={(v) => setPw((p) => ({ ...p, next: v }))}
+          />
+          <Field
+            label="Confirm new password"
+            type="password"
+            value={pw.confirm}
+            placeholder="Re-enter the new password"
+            onChange={(v) => setPw((p) => ({ ...p, confirm: v }))}
+          />
 
-        {/* Answers */}
-        <Section label="Answers" accent>
-          <label className="flex flex-col gap-2 py-1">
-            <span className="text-[14px] font-medium">Answer style</span>
-            <select
-              value={prefs.answerStyle}
-              onChange={(e) => set("answerStyle", e.target.value as AnswerStyle)}
-              className="rounded-[10px] border border-stroke bg-canvas px-[15px] py-3 text-[15px] outline-none focus:border-accent"
+          {pwMsg ? (
+            <div
+              className={`rounded-[9px] px-[13px] py-2.5 text-[13px] ${
+                pwMsg.kind === "ok"
+                  ? "border border-accent-line bg-accent-tint text-accent-deep"
+                  : "border border-danger-border bg-danger-bg text-danger"
+              }`}
             >
-              {ANSWER_STYLES.map(([value, text]) => (
-                <option key={value} value={value}>
-                  {text}
-                </option>
-              ))}
-            </select>
-          </label>
+              {pwMsg.text}
+            </div>
+          ) : null}
 
-          <div className="divide-y divide-line-soft">
-            <Row
-              title="Always show citations"
-              desc="Attach the source brochure and page to every figure in an answer."
-            >
-              <Toggle
-                label="Always show citations"
-                on={prefs.citationsAlways}
-                onChange={(v) => set("citationsAlways", v)}
-              />
-            </Row>
-            <Row
-              title="Region-aware pricing"
-              desc="Bias pricing, tax and availability answers to your profile region."
-            >
-              <Toggle
-                label="Region-aware pricing"
-                on={prefs.regionAware}
-                onChange={(v) => set("regionAware", v)}
-              />
-            </Row>
-            <Row
-              title="Compact message density"
-              desc="Tighter spacing between messages in the chat window."
-            >
-              <Toggle
-                label="Compact message density"
-                on={prefs.compactMessages}
-                onChange={(v) => set("compactMessages", v)}
-              />
-            </Row>
-          </div>
-        </Section>
-
-        {/* Notifications */}
-        <Section label="Notifications">
-          <div className="divide-y divide-line-soft">
-            <Row
-              title="Product updates"
-              desc="Occasional email when new marques or features land."
-            >
-              <Toggle
-                label="Product updates"
-                on={prefs.productUpdates}
-                onChange={(v) => set("productUpdates", v)}
-              />
-            </Row>
-            <Row
-              title="Weekly digest"
-              desc="A summary of the brochures added to the library each week."
-            >
-              <Toggle
-                label="Weekly digest"
-                on={prefs.weeklyDigest}
-                onChange={(v) => set("weeklyDigest", v)}
-              />
-            </Row>
-          </div>
-        </Section>
-
-        {/* Security */}
-        <Section label="Security" accent>
-          <div className="flex flex-col gap-4 pt-1">
-            <Field
-              label="Current password"
-              type="password"
-              value={pw.current}
-              placeholder="••••••••"
-              onChange={(v) => setPw((p) => ({ ...p, current: v }))}
-            />
-            <Field
-              label="New password"
-              type="password"
-              value={pw.next}
-              placeholder="At least 8 characters"
-              onChange={(v) => setPw((p) => ({ ...p, next: v }))}
-            />
-            <Field
-              label="Confirm new password"
-              type="password"
-              value={pw.confirm}
-              placeholder="Re-enter the new password"
-              onChange={(v) => setPw((p) => ({ ...p, confirm: v }))}
-            />
-
-            {pwMsg ? (
-              <div
-                className={`rounded-[9px] px-[13px] py-2.5 text-[13px] ${
-                  pwMsg.kind === "ok"
-                    ? "border border-accent-line bg-accent-tint text-accent-deep"
-                    : "border border-danger-border bg-danger-bg text-danger"
-                }`}
-              >
-                {pwMsg.text}
-              </div>
-            ) : null}
-
-            <Button
-              variant="solid"
-              className="w-fit px-5 py-2.5 text-[14px] disabled:cursor-not-allowed disabled:opacity-40"
-              onClick={updatePassword}
-              disabled={!pw.current && !pw.next && !pw.confirm}
-            >
-              Update password
-            </Button>
-          </div>
-        </Section>
-
-        {/* Data */}
-        <Section label="Data">
-          <Row
-            title="Clear all chats"
-            desc={`Removes all ${chats.length} conversations and starts a fresh one. Uploaded brochures stay in the library.`}
+          <Button
+            variant="solid"
+            className="w-fit px-4 py-2 text-[13px] disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={updatePassword}
+            disabled={!pw.current && !pw.next && !pw.confirm}
           >
-            {confirmClear ? (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    clearChats();
-                    setConfirmClear(false);
-                  }}
-                  className="cursor-pointer rounded-[9px] bg-danger px-3 py-1.5 text-[12.5px] font-medium text-canvas transition-colors hover:bg-danger-ink"
-                >
-                  Confirm
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmClear(false)}
-                  className="cursor-pointer bg-transparent text-[12.5px] text-muted-2 hover:text-ink"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
+            Update password
+          </Button>
+        </div>
+      </Section>
+
+      <Section label="Session">
+        <Row
+          title="Sign out"
+          desc="End this session on this device. Your chats and uploads are kept."
+        >
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="cursor-pointer rounded-[9px] border border-stroke bg-canvas px-3 py-1.5 text-[12.5px] transition-colors hover:border-ink"
+          >
+            Sign out
+          </button>
+        </Row>
+      </Section>
+
+      {/* Danger zone */}
+      <div className="mt-3 flex flex-col gap-2.5 rounded-xl border border-danger-border bg-danger-bg-2 p-4">
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-danger">
+          Delete account
+        </div>
+        <p className="m-0 text-[12px] leading-[1.55] text-slate">
+          Permanently removes your profile, chats and uploaded brochures. This
+          can't be undone.
+        </p>
+
+        {confirmDelete ? (
+          <div className="flex flex-col gap-3">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-[12.5px] font-medium text-label">
+                Type <span className="font-mono text-danger">DELETE</span> to
+                confirm
+              </span>
+              <input
+                value={deleteText}
+                onChange={(e) => setDeleteText(e.target.value)}
+                placeholder="DELETE"
+                className="rounded-[9px] border border-danger-border bg-canvas px-3 py-2 text-[13px] outline-none focus:border-danger"
+              />
+            </label>
+            <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setConfirmClear(true)}
-                className="cursor-pointer rounded-[9px] border border-stroke bg-canvas px-3 py-1.5 text-[12.5px] transition-colors hover:border-ink"
+                disabled={deleteText !== "DELETE"}
+                onClick={() => navigate("/")}
+                className="cursor-pointer rounded-[9px] bg-danger px-4 py-2 text-[13px] font-medium text-canvas transition-colors hover:bg-danger-ink disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Clear
+                Delete my account
               </button>
-            )}
-          </Row>
-        </Section>
-
-        {/* Danger zone */}
-        <div className="mt-4 flex flex-col gap-3 rounded-xl border border-danger-border bg-danger-bg-2 p-5">
-          <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-danger">
-            Delete account
-          </div>
-          <p className="m-0 text-[13.5px] leading-[1.55] text-slate">
-            Permanently removes your profile, chats and uploaded brochures. This
-            can't be undone.
-          </p>
-
-          {confirmDelete ? (
-            <div className="flex flex-col gap-3">
-              <label className="flex flex-col gap-2">
-                <span className="text-[13px] font-medium text-label">
-                  Type <span className="font-mono text-danger">DELETE</span> to
-                  confirm
-                </span>
-                <input
-                  value={deleteText}
-                  onChange={(e) => setDeleteText(e.target.value)}
-                  placeholder="DELETE"
-                  className="rounded-[10px] border border-danger-border bg-canvas px-[15px] py-3 text-[15px] outline-none focus:border-danger"
-                />
-              </label>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  disabled={deleteText !== "DELETE"}
-                  onClick={() => navigate("/")}
-                  className="cursor-pointer rounded-[10px] bg-danger px-5 py-2.5 text-[14px] font-medium text-canvas transition-colors hover:bg-danger-ink disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Delete my account
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setConfirmDelete(false);
-                    setDeleteText("");
-                  }}
-                  className="cursor-pointer bg-transparent text-[13px] text-muted-2 transition-colors hover:text-ink"
-                >
-                  Cancel
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmDelete(false);
+                  setDeleteText("");
+                }}
+                className="cursor-pointer bg-transparent text-[12.5px] text-muted-2 transition-colors hover:text-ink"
+              >
+                Cancel
+              </button>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmDelete(true)}
-              className="w-fit cursor-pointer rounded-[10px] border border-danger-stroke bg-canvas px-4 py-2.5 text-[13.5px] font-medium text-danger transition-colors hover:bg-danger-bg"
-            >
-              Delete account
-            </button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            className="w-fit cursor-pointer rounded-[9px] border border-danger-stroke bg-canvas px-3.5 py-2 text-[12.5px] font-medium text-danger transition-colors hover:bg-danger-bg"
+          >
+            Delete account
+          </button>
+        )}
       </div>
-    </div>
+    </TabBody>
   );
 }

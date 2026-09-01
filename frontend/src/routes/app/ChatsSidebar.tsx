@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "../../components/Logo";
 import { BRAND_NAME } from "../../lib/brand";
+import type { SettingsTab } from "./AppLayout";
 import { useApp } from "./AppStore";
 import { SHORT, type Upload } from "./appData";
 
@@ -23,9 +24,11 @@ export function contextSummary(ids: string[], uploads: Upload[]): string {
 export function ChatsSidebar({
   collapsed,
   onToggle,
+  onOpenSettings,
 }: {
   collapsed: boolean;
   onToggle: () => void;
+  onOpenSettings: (tab: SettingsTab) => void;
 }) {
   const navigate = useNavigate();
   const { state, chats, newChat, selectChat } = useApp();
@@ -50,6 +53,11 @@ export function ChatsSidebar({
   const goto = (path: string) => {
     setMenuOpen(false);
     navigate(path);
+  };
+
+  const openSettings = (tab: SettingsTab) => {
+    setMenuOpen(false);
+    onOpenSettings(tab);
   };
 
   const startChat = () => {
@@ -93,7 +101,7 @@ export function ChatsSidebar({
         </div>
         <button
           type="button"
-          onClick={() => navigate("/app/profile")}
+          onClick={() => onOpenSettings("profile")}
           title={user.name}
           className="mt-auto flex h-8 w-8 flex-none items-center justify-center rounded-full bg-ink text-[11px] font-medium text-canvas"
         >
@@ -215,7 +223,7 @@ export function ChatsSidebar({
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => goto("/app/profile")}
+                onClick={() => openSettings("profile")}
                 className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] text-ink transition-colors hover:bg-panel-hover"
               >
                 <UserIcon />
@@ -224,7 +232,7 @@ export function ChatsSidebar({
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => goto("/app/settings")}
+                onClick={() => openSettings("chat")}
                 className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] text-ink transition-colors hover:bg-panel-hover"
               >
                 <GearIcon />

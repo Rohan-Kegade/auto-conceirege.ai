@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
 import { useApp } from "./AppStore";
 
@@ -39,21 +38,20 @@ function Field({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex flex-col gap-2">
-      <span className="text-[13px] font-medium text-label">{label}</span>
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[12.5px] font-medium text-label">{label}</span>
       <input
         type={type}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-[10px] border border-stroke bg-canvas px-[15px] py-3 text-[15px] outline-none focus:border-accent"
+        className="rounded-[9px] border border-stroke bg-canvas px-3 py-2 text-[13px] outline-none focus:border-accent"
       />
     </label>
   );
 }
 
 export function ProfileView() {
-  const navigate = useNavigate();
   const { state, chats, setUser } = useApp();
   const { user, uploads } = state;
 
@@ -102,144 +100,107 @@ export function ProfileView() {
   ];
 
   return (
-    <div data-view="profile" className="flex-1 overflow-y-auto px-7 py-8">
-      <div className="mx-auto flex max-w-[640px] flex-col gap-8">
-        <button
-          type="button"
-          onClick={() => navigate("/app")}
-          className="flex w-fit cursor-pointer items-center gap-1.5 bg-transparent font-mono text-[11px] uppercase tracking-[0.12em] text-muted-3 transition-colors hover:text-ink"
-        >
-          <span aria-hidden="true">←</span> Back to chats
-        </button>
-
-        {/* Identity header */}
-        <div className="flex items-center gap-4">
-          <span className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-ink text-[17px] font-semibold text-canvas">
-            {initials(form.name || user.name)}
+    <div data-view="profile" className="flex flex-col gap-6">
+      {/* Identity header */}
+      <div className="flex items-center gap-3.5">
+        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-ink text-[14px] font-semibold text-canvas">
+          {initials(form.name || user.name)}
+        </span>
+        <div className="flex min-w-0 flex-col">
+          <h2 className="m-0 truncate text-[17px] font-semibold tracking-[-0.015em]">
+            {form.name || user.name}
+          </h2>
+          <span className="truncate text-[12.5px] text-muted-2">
+            {form.email || "no email set"}
           </span>
-          <div className="flex min-w-0 flex-col">
-            <h2 className="m-0 truncate text-[22px] font-semibold tracking-[-0.015em]">
-              {form.name || user.name}
-            </h2>
-            <span className="truncate text-[13.5px] text-muted-2">
-              {form.email || "no email set"}
+        </div>
+      </div>
+
+      {/* Snapshot */}
+      <div className="grid grid-cols-3 gap-2.5">
+        {stats.map(([label, value]) => (
+          <div
+            key={label}
+            className="flex flex-col gap-0.5 rounded-lg border border-line bg-canvas p-3"
+          >
+            <span className="truncate text-[14px] font-semibold">{value}</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-3">
+              {label}
             </span>
           </div>
+        ))}
+      </div>
+
+      {/* Editable details */}
+      <div className="flex flex-col gap-4">
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-accent">
+          Your details
         </div>
 
-        {/* Snapshot */}
-        <div className="grid grid-cols-3 gap-3">
-          {stats.map(([label, value]) => (
-            <div
-              key={label}
-              className="flex flex-col gap-1 rounded-xl border border-line bg-canvas p-3.5"
+        <Field
+          label="Full name"
+          value={form.name}
+          placeholder="Riya Alvarez"
+          onChange={set("name")}
+        />
+        <Field
+          label="Email"
+          type="email"
+          value={form.email}
+          placeholder="you@email.com"
+          onChange={set("email")}
+        />
+        <Field
+          label="What you're shopping for"
+          value={form.shoppingFor}
+          placeholder="7-seat family SUV"
+          onChange={set("shoppingFor")}
+        />
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[12.5px] font-medium text-label">Region</span>
+          <select
+            value={form.region}
+            onChange={(e) => set("region")(e.target.value)}
+            className="rounded-[9px] border border-stroke bg-canvas px-3 py-2 text-[13px] outline-none focus:border-accent"
+          >
+            {(REGIONS.includes(form.region)
+              ? REGIONS
+              : [form.region, ...REGIONS]
+            ).map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+          <span className="text-[11.5px] text-muted-3">
+            Used to bias pricing and availability answers.
+          </span>
+        </label>
+
+        <div className="mt-1 flex items-center gap-3">
+          <Button
+            variant="solid"
+            className="px-4 py-2 text-[13px] disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={save}
+            disabled={!dirty}
+          >
+            Save changes
+          </Button>
+          {dirty ? (
+            <button
+              type="button"
+              onClick={() => setForm(user)}
+              className="cursor-pointer bg-transparent text-[12.5px] text-muted-2 transition-colors hover:text-ink"
             >
-              <span className="truncate text-[17px] font-semibold">{value}</span>
-              <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-muted-3">
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Editable details */}
-        <div className="flex flex-col gap-5">
-          <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
-            Your details
-          </div>
-
-          <Field
-            label="Full name"
-            value={form.name}
-            placeholder="Riya Alvarez"
-            onChange={set("name")}
-          />
-          <Field
-            label="Email"
-            type="email"
-            value={form.email}
-            placeholder="you@email.com"
-            onChange={set("email")}
-          />
-          <Field
-            label="What you're shopping for"
-            value={form.shoppingFor}
-            placeholder="7-seat family SUV"
-            onChange={set("shoppingFor")}
-          />
-
-          <label className="flex flex-col gap-2">
-            <span className="text-[13px] font-medium text-label">Region</span>
-            <select
-              value={form.region}
-              onChange={(e) => set("region")(e.target.value)}
-              className="rounded-[10px] border border-stroke bg-canvas px-[15px] py-3 text-[15px] outline-none focus:border-accent"
-            >
-              {(REGIONS.includes(form.region)
-                ? REGIONS
-                : [form.region, ...REGIONS]
-              ).map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-            <span className="text-[12px] text-muted-3">
-              Used to bias pricing and availability answers.
+              Discard
+            </button>
+          ) : null}
+          {savedAt ? (
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-accent">
+              Saved
             </span>
-          </label>
-
-          <div className="mt-1 flex items-center gap-3">
-            <Button
-              variant="solid"
-              className="px-5 py-2.5 text-[14px] disabled:cursor-not-allowed disabled:opacity-40"
-              onClick={save}
-              disabled={!dirty}
-            >
-              Save changes
-            </Button>
-            {dirty ? (
-              <button
-                type="button"
-                onClick={() => setForm(user)}
-                className="cursor-pointer bg-transparent text-[13px] text-muted-2 transition-colors hover:text-ink"
-              >
-                Discard
-              </button>
-            ) : null}
-            {savedAt ? (
-              <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-accent">
-                Saved
-              </span>
-            ) : null}
-          </div>
-        </div>
-
-        {/* Account actions */}
-        <div className="flex flex-col gap-3 border-t border-line pt-6">
-          <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-3">
-            Account
-          </div>
-          <p className="m-0 text-[13px] leading-[1.55] text-muted-2">
-            Password, notifications, answer preferences and account deletion live
-            in Settings.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/app/settings")}
-              className="cursor-pointer rounded-[10px] border border-stroke bg-canvas px-4 py-2.5 text-[13.5px] transition-colors hover:border-ink"
-            >
-              Open settings
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/")}
-              className="cursor-pointer rounded-[10px] border border-stroke bg-canvas px-4 py-2.5 text-[13.5px] text-danger transition-colors hover:bg-danger-bg"
-            >
-              Sign out
-            </button>
-          </div>
+          ) : null}
         </div>
       </div>
     </div>
